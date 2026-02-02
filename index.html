@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalytics</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111;
+            --bg-tertiary: #0a0a0a;
+            --border-color: #222;
+            --border-hover: #333;
+            --text-primary: white;
+            --text-secondary: #888;
+            --text-tertiary: #666;
+            --text-muted: #555;
+            --text-code: #e879f9;
+            --scrollbar: #222;
+            --scrollbar-hover: #333;
+            --success: #22c55e;
+            --error: #ef4444;
+            --accent-icon: #e879f9;
+            --accent-purple: #a855f7;
+            --accent-blue: #3b82f6;
+            --accent-orange: #f97316;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f8f8;
+            --bg-tertiary: #ffffff;
+            --border-color: #e5e5e5;
+            --border-hover: #d4d4d4;
+            --text-primary: #0a0a0a;
+            --text-secondary: #666;
+            --text-tertiary: #888;
+            --text-muted: #aaa;
+            --text-code: #a855f7;
+            --scrollbar: #d4d4d4;
+            --scrollbar-hover: #a3a3a3;
+            --success: #16a34a;
+            --error: #dc2626;
+            --accent-icon: #666;
+            --accent-purple: #9333ea;
+            --accent-blue: #2563eb;
+            --accent-orange: #ea580c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            padding: 40px 20px;
+            transition: background 0.3s ease;
+        }
+
+        /* Icon Color Logic */
+        [data-theme="dark"] .icon,
+        [data-theme="dark"] .user-list-container h3 i {
+            color: var(--accent-icon) !important;
+            opacity: 1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 0.95em;
+            margin-bottom: 50px;
+            font-weight: 400;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--border-hover);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle i {
+            color: var(--text-secondary);
+            font-size: 1.2em;
+        }
+
+        .instructions {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border-color);
+        }
+
+        .instructions h2 {
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .instructions ol {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding-left: 20px;
+            font-size: 0.9em;
+        }
+
+        .instructions code {
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.85em;
+            color: var(--text-code);
+            border: 1px solid var(--border-color);
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .upload-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-box:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-tertiary);
+        }
+
+        .upload-box.loaded {
+            border-color: var(--success);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .upload-box.error {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .upload-box h3 {
+            color: var(--text-primary);
+            margin: 12px 0 8px;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .upload-box p {
+            color: var(--text-tertiary);
+            font-size: 0.85em;
+        }
+
+        .icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+            opacity: 0.6;
+            color: var(--text-tertiary);
+            transition: color 0.3s ease;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 0.95em;
+            font-weight: 600;
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--border-hover);
+            background: var(--bg-tertiary);
+        }
+
+        .btn-small {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 0.85em;
+        }
+
+        .debug-info {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 16px 0;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.8em;
+            color: var(--success);
+            display: none;
+            border: 1px solid var(--border-color);
+        }
+
+        .results {
+            display: none;
+        }
+
+        /* Statistics Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .stat-card .icon {
+            font-size: 1.5em;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 8px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        /* Extended Stats */
+        .extended-stats {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .extended-stats h3 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-item-label {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+
+        .stat-item-value {
+            color: var(--text-primary);
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pie-chart {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.mutuals { background: var(--success); }
+        .legend-color.nfb { background: var(--error); }
+        .legend-color.fans { background: var(--accent-blue); }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .action-bar .btn {
+            width: auto;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        /* Search and Filter */
+        .list-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--border-hover);
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .sort-select {
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9em;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--border-hover);
+        }
+
+        .user-list-container {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            transition: background 0.3s ease;
+        }
+
+        .user-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .user-list-container h3 {
+            color: var(--text-primary);
+            font-size: 1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .user-list {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .user-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .user-list::-webkit-scrollbar-thumb {
+            background: var(--scrollbar);
+            border-radius: 4px;
+        }
+
+        .user-list::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-hover);
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.15s ease;
+        }
+
+        .user-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .username {
+            color: var(--text-primary);
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .user-date {
+            color: var(--text-muted);
+            font-size: 0.75em;
+        }
+
+        .profile-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85em;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .profile-link:hover {
+            color: var(--text-primary);
+        }
+
+        .empty-message {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px;
+            font-size: 0.9em;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 500;
+            z-index: 1001;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .privacy-notice {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 32px;
+            text-align: center;
+        }
+
+        .privacy-notice p {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+
+        /* Snapshot Section */
+        .snapshot-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .snapshot-section h3 {
+            color: var(--text-primary);
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .snapshot-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .snapshot-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .snapshot-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .snapshot-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .snapshot-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .snapshot-name {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .snapshot-date {
+            color: var(--text-muted);
+            font-size: 0.8em;
+        }
+
+        .snapshot-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .snapshot-item-actions button {
+            padding: 6px 12px;
+            font-size: 0.8em;
+        }
+
+        /* Comparison Results */
+        .comparison-results {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .comparison-results h4 {
+            color: var(--text-primary);
+            font-size: 0.95em;
+            margin-bottom: 12px;
+        }
+
+        .comparison-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9em;
+        }
+
+        .comparison-stat:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-stat-label {
+            color: var(--text-secondary);
+        }
+
+        .comparison-stat-value {
+            font-weight: 600;
+        }
+
+        .comparison-stat-value.positive {
+            color: var(--success);
+        }
+
+        .comparison-stat-value.negative {
+            color: var(--error);
+        }
+
+        .comparison-stat-value.neutral {
+            color: var(--text-primary);
+        }
+
+        /* Unfollow Helper */
+        .unfollow-helper {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .unfollow-helper h3 {
+            color: var(--text-primary);
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .unfollow-helper textarea {
+            width: 100%;
+            height: 200px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.85em;
+            resize: vertical;
+        }
+
+        .unfollow-helper textarea:focus {
+            outline: none;
+            border-color: var(--border-hover);
+        }
+
+        .unfollow-helper p {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            margin-bottom: 12px;
+        }
+
+        .donation-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .donation-section h3 {
+            color: var(--text-primary);
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .donation-section p {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            margin-bottom: 20px;
+        }
+
+        .donation-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .donate-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .donate-btn.coffee {
+            background: #FFDD00;
+            color: #000;
+        }
+
+        .donate-btn.coffee:hover {
+            background: #FFED4E;
+            transform: translateY(-2px);
+        }
+
+        .donate-btn.paypal {
+            background: #0070BA;
+            color: white;
+        }
+
+        .donate-btn.paypal:hover {
+            background: #005A9C;
+            transform: translateY(-2px);
+        }
+
+        /* Multiple file support */
+        .multi-file-hint {
+            color: var(--text-muted);
+            font-size: 0.8em;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .action-bar .btn {
+                width: 100%;
+            }
+
+            .list-controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .sort-select {
+                width: 100%;
+            }
+
+            .user-list-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions .btn {
+                flex: 1;
+            }
+
+            .chart-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .snapshot-actions {
+                flex-direction: column;
+            }
+
+            .snapshot-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check"></i>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <div class="container">
+        <h1>Instalytics</h1>
+        <p class="subtitle">Analyze your follower data privately in your browser</p>
+
+        <div id="upload-screen">
+            <div class="instructions">
+                <h2>How to get your data</h2>
+                <ol>
+                    <li>Go to Instagram Settings → Account Center → Your Information and Permissions</li>
+                    <li>Click "Download your information" → Request a download</li>
+                    <li>Select JSON format (not HTML)</li>
+                    <li>Wait for email (usually takes a few hours)</li>
+                    <li>Download and extract the ZIP file</li>
+                    <li>Upload <code>followers_1.json</code> and <code>following.json</code> below</li>
+                </ol>
+            </div>
+
+            <div class="upload-section">
+                <label class="upload-box" id="followers-box">
+                    <i class="fas fa-upload icon"></i>
+                    <h3 id="followers-title">Upload Followers</h3>
+                    <p id="followers-count">followers_1.json</p>
+                    <p class="multi-file-hint">Supports multiple files (followers_1.json, followers_2.json, etc.)</p>
+                    <input type="file" id="followers-input" accept=".json" multiple>
+                </label>
+
+                <label class="upload-box" id="following-box">
+                    <i class="fas fa-upload icon"></i>
+                    <h3 id="following-title">Upload Following</h3>
+                    <p id="following-count">following.json</p>
+                    <input type="file" id="following-input" accept=".json">
+                </label>
+            </div>
+
+            <div class="debug-info" id="debug-info"></div>
+
+            <button class="btn" id="analyze-btn" disabled>Analyze Data</button>
+        </div>
+
+        <div class="results" id="results-screen">
+            <div class="stats-grid">
+                <div class="stat-card mutuals">
+                    <i class="fas fa-user-friends icon"></i>
+                    <div class="stat-number" id="mutuals-count">0</div>
+                    <div class="stat-label">Mutuals</div>
+                </div>
+                <div class="stat-card nfb">
+                    <i class="fas fa-user-minus icon"></i>
+                    <div class="stat-number" id="nfb-count">0</div>
+                    <div class="stat-label">Don't Follow Back</div>
+                </div>
+                <div class="stat-card fans">
+                    <i class="fas fa-heart icon"></i>
+                    <div class="stat-number" id="fans-count">0</div>
+                    <div class="stat-label">Your Fans</div>
+                </div>
+            </div>
+
+            <!-- Extended Statistics -->
+            <div class="extended-stats">
+                <h3><i class="fas fa-chart-pie"></i> Detailed Statistics</h3>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-item-label">Total Followers</span>
+                        <span class="stat-item-value" id="total-followers">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-item-label">Total Following</span>
+                        <span class="stat-item-value" id="total-following">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-item-label">Follow-Back Ratio</span>
+                        <span class="stat-item-value" id="followback-ratio">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-item-label">Engagement Score</span>
+                        <span class="stat-item-value" id="engagement-score">0%</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="pie-chart" id="pie-chart"></div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color mutuals"></div>
+                            <span>Mutuals (<span id="legend-mutuals-pct">0</span>%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color nfb"></div>
+                            <span>Don't Follow Back (<span id="legend-nfb-pct">0</span>%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color fans"></div>
+                            <span>Fans (<span id="legend-fans-pct">0</span>%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Snapshot Section -->
+            <div class="snapshot-section">
+                <h3><i class="fas fa-camera"></i> Snapshots & Comparison</h3>
+                <div class="snapshot-actions">
+                    <button class="btn btn-secondary btn-small" id="save-snapshot-btn">
+                        <i class="fas fa-save"></i> Save Current Snapshot
+                    </button>
+                    <button class="btn btn-secondary btn-small" id="clear-snapshots-btn">
+                        <i class="fas fa-trash"></i> Clear All Snapshots
+                    </button>
+                </div>
+                <div class="snapshot-list" id="snapshot-list">
+                    <div class="empty-message">No snapshots saved yet. Save a snapshot to track changes over time.</div>
+                </div>
+                <div class="comparison-results" id="comparison-results">
+                    <h4>Comparison with Previous Snapshot</h4>
+                    <div class="comparison-stat">
+                        <span class="comparison-stat-label">Followers Change</span>
+                        <span class="comparison-stat-value" id="comp-followers">0</span>
+                    </div>
+                    <div class="comparison-stat">
+                        <span class="comparison-stat-label">Following Change</span>
+                        <span class="comparison-stat-value" id="comp-following">0</span>
+                    </div>
+                    <div class="comparison-stat">
+                        <span class="comparison-stat-label">Mutuals Change</span>
+                        <span class="comparison-stat-value" id="comp-mutuals">0</span>
+                    </div>
+                    <div class="comparison-stat">
+                        <span class="comparison-stat-label">New Unfollowers</span>
+                        <span class="comparison-stat-value" id="comp-unfollowers">0</span>
+                    </div>
+                    <div class="comparison-stat">
+                        <span class="comparison-stat-label">New Followers</span>
+                        <span class="comparison-stat-value" id="comp-new-followers">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <button class="btn btn-secondary" id="export-csv-btn">
+                    <i class="fas fa-file-csv"></i> Export CSV
+                </button>
+                <button class="btn btn-secondary" id="export-json-btn">
+                    <i class="fas fa-file-code"></i> Export JSON
+                </button>
+                <button class="btn btn-secondary" id="show-unfollow-btn">
+                    <i class="fas fa-list"></i> Unfollow Helper
+                </button>
+            </div>
+
+            <!-- Unfollow Helper -->
+            <div class="unfollow-helper" id="unfollow-helper">
+                <h3><i class="fas fa-clipboard-list"></i> Batch Unfollow Helper</h3>
+                <p>Copy this list of usernames who don't follow you back. You can use this as a reference when manually unfollowing on Instagram.</p>
+                <textarea id="unfollow-list" readonly></textarea>
+                <div style="margin-top: 12px;">
+                    <button class="btn btn-small" id="copy-unfollow-btn">
+                        <i class="fas fa-copy"></i> Copy List
+                    </button>
+                </div>
+            </div>
+
+            <!-- Global Search -->
+            <div class="list-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="global-search" placeholder="Search all lists...">
+                </div>
+                <select class="sort-select" id="global-sort">
+                    <option value="alpha-asc">A → Z</option>
+                    <option value="alpha-desc">Z → A</option>
+                    <option value="date-newest">Newest First</option>
+                    <option value="date-oldest">Oldest First</option>
+                </select>
+            </div>
+
+            <div class="user-list-container">
+                <div class="user-list-header">
+                    <h3><i class="fas fa-user-minus"></i> People Not Following You Back (<span id="nfb-visible-count">0</span>)</h3>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-small" data-copy="nfb">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="user-list" id="nfb-list"></div>
+            </div>
+
+            <div class="user-list-container">
+                <div class="user-list-header">
+                    <h3><i class="fas fa-heart"></i> Your Fans (<span id="fans-visible-count">0</span>)</h3>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-small" data-copy="fans">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="user-list" id="fans-list"></div>
+            </div>
+
+            <div class="user-list-container">
+                <div class="user-list-header">
+                    <h3><i class="fas fa-user-friends"></i> Mutual Followers (<span id="mutuals-visible-count">0</span>)</h3>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-small" data-copy="mutuals">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="user-list" id="mutuals-list"></div>
+            </div>
+
+            <button class="btn" onclick="location.reload()">Analyze Another Account</button>
+        </div>
+
+        <div class="privacy-notice">
+            <p>All data is processed locally in your browser. Nothing is uploaded to any server.</p>
+        </div>
+
+        <div class="donation-section">
+            <h3>Enjoying this tool?</h3>
+            <p>If you found this helpful, consider supporting the project!</p>
+            <div class="donation-buttons">
+                <a href="https://www.buymeacoffee.com/erisbpdev"
+                    onclick="window.open(this.href, 'bmcPopup', 'width=500,height=700,scrollbars=yes'); return false;"
+                    class="donate-btn coffee">
+                    <i class="fas fa-coffee"></i>
+                    <span>Buy Me a Coffee</span>
+                </a>
+                <a href="https://www.paypal.com/paypalme/ErisBPDev"
+                    onclick="window.open(this.href, 'bmcPopup', 'width=500,height=700,scrollbars=yes'); return false;"
+                    class="donate-btn paypal">
+                    <i class="fab fa-paypal"></i>
+                    <span>Donate via PayPal</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage with timestamps
+        let followersData = []; // {username, timestamp}
+        let followingData = []; // {username, timestamp}
+        let analysisResults = {
+            mutuals: [],
+            notFollowingBack: [],
+            fans: []
+        };
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const themeIcon = themeToggle.querySelector('i');
+
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-moon';
+            } else {
+                themeIcon.className = 'fas fa-sun';
+            }
+        }
+
+        // Toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // Extract usernames with timestamps
+        function extractUsernames(data) {
+            const users = [];
+            const seen = new Set();
+
+            function recursiveExtract(obj) {
+                if (!obj) return;
+                if (Array.isArray(obj)) {
+                    obj.forEach(item => recursiveExtract(item));
+                    return;
+                }
+                if (typeof obj === 'object') {
+                    if (obj.string_list_data && Array.isArray(obj.string_list_data)) {
+                        obj.string_list_data.forEach(item => {
+                            if (item.value && !seen.has(item.value)) {
+                                seen.add(item.value);
+                                users.push({
+                                    username: item.value,
+                                    timestamp: item.timestamp ? item.timestamp * 1000 : null
+                                });
+                            }
+                        });
+                    }
+                    if (obj.username && typeof obj.username === 'string' && !seen.has(obj.username)) {
+                        seen.add(obj.username);
+                        users.push({
+                            username: obj.username,
+                            timestamp: obj.timestamp ? obj.timestamp * 1000 : null
+                        });
+                    }
+                    if (obj.title && typeof obj.title === 'string' && obj.title.length > 0 && !obj.title.includes(' ') && !seen.has(obj.title)) {
+                        seen.add(obj.title);
+                        users.push({
+                            username: obj.title,
+                            timestamp: obj.timestamp ? obj.timestamp * 1000 : null
+                        });
+                    }
+                    Object.values(obj).forEach(value => {
+                        if (typeof value === 'object') {
+                            recursiveExtract(value);
+                        }
+                    });
+                }
+            }
+            recursiveExtract(data);
+            return users;
+        }
+
+        function showDebug(message, isError = false) {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.style.display = 'block';
+            debugDiv.style.color = isError ? '#f87171' : '#4ade80';
+            debugDiv.textContent = message;
+        }
+
+        // Multiple file support for followers
+        document.getElementById('followers-input').addEventListener('change', async function (e) {
+            const files = e.target.files;
+            if (!files.length) return;
+
+            followersData = [];
+            let totalParsed = 0;
+
+            for (const file of files) {
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    const extracted = extractUsernames(data);
+                    followersData = followersData.concat(extracted);
+                    totalParsed++;
+                } catch (err) {
+                    console.error(`Error parsing ${file.name}:`, err);
+                }
+            }
+
+            // Remove duplicates
+            const seen = new Set();
+            followersData = followersData.filter(u => {
+                if (seen.has(u.username)) return false;
+                seen.add(u.username);
+                return true;
+            });
+
+            if (followersData.length === 0) {
+                document.getElementById('followers-box').classList.add('error');
+            } else {
+                document.getElementById('followers-box').classList.remove('error');
+                document.getElementById('followers-box').classList.add('loaded');
+                document.getElementById('followers-title').textContent = 'Followers Loaded';
+                document.getElementById('followers-count').textContent = `${followersData.length} followers from ${totalParsed} file(s)`;
+            }
+            checkBothFilesLoaded();
+        });
+
+        document.getElementById('following-input').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    followingData = extractUsernames(data);
+                    if (followingData.length === 0) {
+                        document.getElementById('following-box').classList.add('error');
+                    } else {
+                        document.getElementById('following-box').classList.remove('error');
+                        document.getElementById('following-box').classList.add('loaded');
+                        document.getElementById('following-title').textContent = 'Following Loaded';
+                        document.getElementById('following-count').textContent = `${followingData.length} following`;
+                    }
+                    checkBothFilesLoaded();
+                } catch (err) {
+                    alert('Error parsing following file');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function checkBothFilesLoaded() {
+            if (followersData.length > 0 && followingData.length > 0) {
+                document.getElementById('analyze-btn').disabled = false;
+            }
+        }
+
+        // Format date
+        function formatDate(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Sort functions
+        function sortUsers(users, sortType) {
+            const sorted = [...users];
+            switch (sortType) {
+                case 'alpha-asc':
+                    sorted.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
+                    break;
+                case 'alpha-desc':
+                    sorted.sort((a, b) => b.username.toLowerCase().localeCompare(a.username.toLowerCase()));
+                    break;
+                case 'date-newest':
+                    sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    break;
+                case 'date-oldest':
+                    sorted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                    break;
+            }
+            return sorted;
+        }
+
+        // Filter users by search
+        function filterUsers(users, searchTerm) {
+            if (!searchTerm) return users;
+            const term = searchTerm.toLowerCase();
+            return users.filter(u => u.username.toLowerCase().includes(term));
+        }
+
+        // Populate list with search/sort
+        function populateList(containerId, users, emptyMessage, visibleCountId) {
+            const list = document.getElementById(containerId);
+            const searchTerm = document.getElementById('global-search').value;
+            const sortType = document.getElementById('global-sort').value;
+
+            let filteredUsers = filterUsers(users, searchTerm);
+            filteredUsers = sortUsers(filteredUsers, sortType);
+
+            document.getElementById(visibleCountId).textContent = filteredUsers.length;
+
+            list.innerHTML = '';
+            if (filteredUsers.length === 0) {
+                list.innerHTML = `<div class="empty-message">${searchTerm ? 'No matching users found' : emptyMessage}</div>`;
+            } else {
+                filteredUsers.forEach(user => {
+                    const item = document.createElement('div');
+                    item.className = 'user-item';
+                    item.innerHTML = `
+                        <div class="user-info">
+                            <span class="username">@${user.username}</span>
+                            ${user.timestamp ? `<span class="user-date">${formatDate(user.timestamp)}</span>` : ''}
+                        </div>
+                        <a href="https://instagram.com/${user.username}"
+                            onclick="window.open(this.href, 'igPopup', 'width=500,height=700,scrollbars=yes'); return false;"
+                            class="profile-link">
+                            View <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                        </a>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+        }
+
+        // Refresh all lists
+        function refreshLists() {
+            populateList('nfb-list', analysisResults.notFollowingBack, 'Everyone you follow follows you back', 'nfb-visible-count');
+            populateList('fans-list', analysisResults.fans, 'No fans found', 'fans-visible-count');
+            populateList('mutuals-list', analysisResults.mutuals, 'No mutual followers', 'mutuals-visible-count');
+        }
+
+        // Search and sort event listeners
+        document.getElementById('global-search').addEventListener('input', refreshLists);
+        document.getElementById('global-sort').addEventListener('change', refreshLists);
+
+        // Copy functionality
+        document.querySelectorAll('[data-copy]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const type = this.dataset.copy;
+                let users;
+                switch (type) {
+                    case 'nfb':
+                        users = analysisResults.notFollowingBack;
+                        break;
+                    case 'fans':
+                        users = analysisResults.fans;
+                        break;
+                    case 'mutuals':
+                        users = analysisResults.mutuals;
+                        break;
+                }
+                const text = users.map(u => u.username).join('\n');
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(`Copied ${users.length} usernames!`);
+                });
+            });
+        });
+
+        // Export functions
+        function exportToCSV() {
+            let csv = 'Category,Username,Date\n';
+
+            analysisResults.notFollowingBack.forEach(u => {
+                csv += `"Not Following Back","${u.username}","${formatDate(u.timestamp)}"\n`;
+            });
+            analysisResults.fans.forEach(u => {
+                csv += `"Fan","${u.username}","${formatDate(u.timestamp)}"\n`;
+            });
+            analysisResults.mutuals.forEach(u => {
+                csv += `"Mutual","${u.username}","${formatDate(u.timestamp)}"\n`;
+            });
+
+            downloadFile(csv, 'instalytics-export.csv', 'text/csv');
+            showToast('CSV exported successfully!');
+        }
+
+        function exportToJSON() {
+            const data = {
+                exportDate: new Date().toISOString(),
+                stats: {
+                    totalFollowers: followersData.length,
+                    totalFollowing: followingData.length,
+                    mutuals: analysisResults.mutuals.length,
+                    notFollowingBack: analysisResults.notFollowingBack.length,
+                    fans: analysisResults.fans.length
+                },
+                notFollowingBack: analysisResults.notFollowingBack,
+                fans: analysisResults.fans,
+                mutuals: analysisResults.mutuals
+            };
+
+            downloadFile(JSON.stringify(data, null, 2), 'instalytics-export.json', 'application/json');
+            showToast('JSON exported successfully!');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        document.getElementById('export-csv-btn').addEventListener('click', exportToCSV);
+        document.getElementById('export-json-btn').addEventListener('click', exportToJSON);
+
+        // Unfollow helper
+        document.getElementById('show-unfollow-btn').addEventListener('click', function() {
+            const helper = document.getElementById('unfollow-helper');
+            helper.style.display = helper.style.display === 'none' ? 'block' : 'none';
+
+            const usernames = analysisResults.notFollowingBack.map(u => u.username).join('\n');
+            document.getElementById('unfollow-list').value = usernames;
+        });
+
+        document.getElementById('copy-unfollow-btn').addEventListener('click', function() {
+            const textarea = document.getElementById('unfollow-list');
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                showToast('Unfollow list copied!');
+            });
+        });
+
+        // Snapshot functionality
+        function getSnapshots() {
+            const saved = localStorage.getItem('instalytics-snapshots');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveSnapshots(snapshots) {
+            localStorage.setItem('instalytics-snapshots', JSON.stringify(snapshots));
+        }
+
+        function renderSnapshots() {
+            const snapshots = getSnapshots();
+            const container = document.getElementById('snapshot-list');
+
+            if (snapshots.length === 0) {
+                container.innerHTML = '<div class="empty-message">No snapshots saved yet. Save a snapshot to track changes over time.</div>';
+                return;
+            }
+
+            container.innerHTML = snapshots.map((snap, index) => `
+                <div class="snapshot-item">
+                    <div class="snapshot-info">
+                        <span class="snapshot-name">${snap.name}</span>
+                        <span class="snapshot-date">${new Date(snap.date).toLocaleString()}</span>
+                    </div>
+                    <div class="snapshot-item-actions">
+                        <button class="btn btn-secondary btn-small" onclick="compareSnapshot(${index})">
+                            <i class="fas fa-balance-scale"></i> Compare
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="deleteSnapshot(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('save-snapshot-btn').addEventListener('click', function() {
+            const snapshots = getSnapshots();
+            const name = `Snapshot ${snapshots.length + 1}`;
+
+            snapshots.push({
+                name,
+                date: new Date().toISOString(),
+                data: {
+                    followers: followersData.map(u => u.username),
+                    following: followingData.map(u => u.username),
+                    mutuals: analysisResults.mutuals.length,
+                    notFollowingBack: analysisResults.notFollowingBack.length,
+                    fans: analysisResults.fans.length
+                }
+            });
+
+            saveSnapshots(snapshots);
+            renderSnapshots();
+            showToast('Snapshot saved!');
+        });
+
+        document.getElementById('clear-snapshots-btn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete all snapshots?')) {
+                localStorage.removeItem('instalytics-snapshots');
+                renderSnapshots();
+                document.getElementById('comparison-results').style.display = 'none';
+                showToast('All snapshots cleared!');
+            }
+        });
+
+        window.compareSnapshot = function(index) {
+            const snapshots = getSnapshots();
+            const oldSnap = snapshots[index];
+            const results = document.getElementById('comparison-results');
+
+            const oldFollowers = new Set(oldSnap.data.followers);
+            const oldFollowing = new Set(oldSnap.data.following);
+            const currentFollowers = new Set(followersData.map(u => u.username));
+            const currentFollowing = new Set(followingData.map(u => u.username));
+
+            // Calculate changes
+            const followersDiff = currentFollowers.size - oldFollowers.size;
+            const followingDiff = currentFollowing.size - oldFollowing.size;
+            const mutualsDiff = analysisResults.mutuals.length - oldSnap.data.mutuals;
+
+            // Find who unfollowed
+            const unfollowers = [...oldFollowers].filter(u => !currentFollowers.has(u));
+            // Find new followers
+            const newFollowers = [...currentFollowers].filter(u => !oldFollowers.has(u));
+
+            // Update display
+            function formatChange(value) {
+                if (value > 0) return `+${value}`;
+                return value.toString();
+            }
+
+            function getClass(value) {
+                if (value > 0) return 'positive';
+                if (value < 0) return 'negative';
+                return 'neutral';
+            }
+
+            document.getElementById('comp-followers').textContent = formatChange(followersDiff);
+            document.getElementById('comp-followers').className = `comparison-stat-value ${getClass(followersDiff)}`;
+
+            document.getElementById('comp-following').textContent = formatChange(followingDiff);
+            document.getElementById('comp-following').className = `comparison-stat-value ${getClass(followingDiff)}`;
+
+            document.getElementById('comp-mutuals').textContent = formatChange(mutualsDiff);
+            document.getElementById('comp-mutuals').className = `comparison-stat-value ${getClass(mutualsDiff)}`;
+
+            document.getElementById('comp-unfollowers').textContent = unfollowers.length;
+            document.getElementById('comp-unfollowers').className = `comparison-stat-value ${unfollowers.length > 0 ? 'negative' : 'neutral'}`;
+
+            document.getElementById('comp-new-followers').textContent = newFollowers.length;
+            document.getElementById('comp-new-followers').className = `comparison-stat-value ${newFollowers.length > 0 ? 'positive' : 'neutral'}`;
+
+            results.style.display = 'block';
+        };
+
+        window.deleteSnapshot = function(index) {
+            const snapshots = getSnapshots();
+            snapshots.splice(index, 1);
+            saveSnapshots(snapshots);
+            renderSnapshots();
+            showToast('Snapshot deleted!');
+        };
+
+        // Draw pie chart
+        function drawPieChart(mutuals, nfb, fans) {
+            const total = mutuals + nfb + fans;
+            if (total === 0) return;
+
+            const mutualsAngle = (mutuals / total) * 360;
+            const nfbAngle = (nfb / total) * 360;
+            const fansAngle = (fans / total) * 360;
+
+            const chart = document.getElementById('pie-chart');
+            chart.style.background = `conic-gradient(
+                var(--success) 0deg ${mutualsAngle}deg,
+                var(--error) ${mutualsAngle}deg ${mutualsAngle + nfbAngle}deg,
+                var(--accent-blue) ${mutualsAngle + nfbAngle}deg 360deg
+            )`;
+
+            // Update legend percentages
+            document.getElementById('legend-mutuals-pct').textContent = Math.round((mutuals / total) * 100);
+            document.getElementById('legend-nfb-pct').textContent = Math.round((nfb / total) * 100);
+            document.getElementById('legend-fans-pct').textContent = Math.round((fans / total) * 100);
+        }
+
+        // Main analyze function
+        document.getElementById('analyze-btn').addEventListener('click', function () {
+            const followersSet = new Set(followersData.map(u => u.username));
+            const followingSet = new Set(followingData.map(u => u.username));
+
+            // Create maps for quick timestamp lookup
+            const followersMap = new Map(followersData.map(u => [u.username, u]));
+            const followingMap = new Map(followingData.map(u => [u.username, u]));
+
+            analysisResults.notFollowingBack = followingData.filter(u => !followersSet.has(u.username));
+            analysisResults.fans = followersData.filter(u => !followingSet.has(u.username));
+            analysisResults.mutuals = followingData.filter(u => followersSet.has(u.username));
+
+            // Update main stats
+            document.getElementById('mutuals-count').textContent = analysisResults.mutuals.length;
+            document.getElementById('nfb-count').textContent = analysisResults.notFollowingBack.length;
+            document.getElementById('fans-count').textContent = analysisResults.fans.length;
+
+            // Update extended stats
+            document.getElementById('total-followers').textContent = followersData.length.toLocaleString();
+            document.getElementById('total-following').textContent = followingData.length.toLocaleString();
+
+            const followBackRatio = followingData.length > 0
+                ? Math.round((analysisResults.mutuals.length / followingData.length) * 100)
+                : 0;
+            document.getElementById('followback-ratio').textContent = `${followBackRatio}%`;
+
+            const engagementScore = (followersData.length + followingData.length) > 0
+                ? Math.round((analysisResults.mutuals.length * 2 / (followersData.length + followingData.length)) * 100)
+                : 0;
+            document.getElementById('engagement-score').textContent = `${engagementScore}%`;
+
+            // Draw chart
+            drawPieChart(
+                analysisResults.mutuals.length,
+                analysisResults.notFollowingBack.length,
+                analysisResults.fans.length
+            );
+
+            // Populate lists
+            refreshLists();
+
+            // Render snapshots
+            renderSnapshots();
+
+            // Show results
+            document.getElementById('upload-screen').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+        });
+    </script>
+</body>
+
+</html>
