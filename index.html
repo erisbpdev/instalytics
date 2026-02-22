@@ -1,1703 +1,1491 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instalytics</title>
+    <title>INSTALYTICS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #111;
-            --bg-tertiary: #0a0a0a;
-            --border-color: #222;
-            --border-hover: #333;
-            --text-primary: white;
-            --text-secondary: #888;
-            --text-tertiary: #666;
-            --text-muted: #555;
-            --text-code: #e879f9;
-            --scrollbar: #222;
-            --scrollbar-hover: #333;
-            --success: #22c55e;
-            --error: #ef4444;
-            --accent-icon: #e879f9;
-            --accent-purple: #a855f7;
-            --accent-blue: #3b82f6;
-            --accent-orange: #f97316;
+            --ink: #0a0805;
+            --paper: #f5f0e8;
+            --paper-2: #ede7d9;
+            --accent: #ff3a1a;
+            --accent-2: #1a5cff;
+            --success: #0a7a3c;
+            --warn: #c45000;
+            --rule: #0a0805;
+            --muted: #7a7060;
+            --mono: 'DM Mono', monospace;
+            --display: 'Bebas Neue', sans-serif;
+            --serif: 'Playfair Display', serif;
         }
 
-        [data-theme="light"] {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f8f8;
-            --bg-tertiary: #ffffff;
-            --border-color: #e5e5e5;
-            --border-hover: #d4d4d4;
-            --text-primary: #0a0a0a;
-            --text-secondary: #666;
-            --text-tertiary: #888;
-            --text-muted: #aaa;
-            --text-code: #a855f7;
-            --scrollbar: #d4d4d4;
-            --scrollbar-hover: #a3a3a3;
-            --success: #16a34a;
-            --error: #dc2626;
-            --accent-icon: #666;
-            --accent-purple: #9333ea;
-            --accent-blue: #2563eb;
-            --accent-orange: #ea580c;
+        [data-theme="dark"] {
+            --ink: #f0ead8;
+            --paper: #0d0c09;
+            --paper-2: #161410;
+            --accent: #ff5530;
+            --accent-2: #4d7fff;
+            --success: #22c55e;
+            --warn: #f97316;
+            --rule: #2a2620;
+            --muted: #6b6456;
         }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-            background: var(--bg-primary);
+            font-family: var(--mono);
+            background: var(--paper);
+            color: var(--ink);
             min-height: 100vh;
-            padding: 40px 20px;
-            transition: background 0.3s ease;
+            transition: background 0.3s, color 0.3s;
+            cursor: default;
         }
 
-        /* Icon Color Logic */
-        [data-theme="dark"] .icon,
-        [data-theme="dark"] .user-list-container h3 i {
-            color: var(--accent-icon) !important;
-            opacity: 1;
+        /* ─── NOISE TEXTURE ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.6;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            color: var(--text-primary);
-            text-align: center;
-            font-size: 2.5em;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            text-align: center;
-            font-size: 0.95em;
-            margin-bottom: 50px;
-            font-weight: 400;
-        }
-
-        .theme-toggle {
+        /* ─── THEME TOGGLE ─── */
+        .theme-btn {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            z-index: 100;
+            width: 44px; height: 44px;
+            border: 2px solid var(--ink);
+            background: var(--paper);
+            color: var(--ink);
             cursor: pointer;
-            transition: all 0.2s ease;
-            z-index: 1000;
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
         }
+        .theme-btn:hover { background: var(--ink); color: var(--paper); }
 
-        .theme-toggle:hover {
-            border-color: var(--border-hover);
-            transform: scale(1.05);
-        }
-
-        .theme-toggle i {
-            color: var(--text-secondary);
-            font-size: 1.2em;
-        }
-
-        .instructions {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 32px;
-            border: 1px solid var(--border-color);
-        }
-
-        .instructions h2 {
-            color: var(--text-primary);
-            margin-bottom: 16px;
-            font-size: 1.1em;
-            font-weight: 600;
-        }
-
-        .instructions ol {
-            color: var(--text-secondary);
-            line-height: 1.7;
-            padding-left: 20px;
-            font-size: 0.9em;
-        }
-
-        .instructions code {
-            background: var(--bg-tertiary);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'SF Mono', 'Monaco', monospace;
-            font-size: 0.85em;
-            color: var(--text-code);
-            border: 1px solid var(--border-color);
-        }
-
-        .upload-section {
+        /* ─── MASTHEAD ─── */
+        .masthead {
+            border-bottom: 3px solid var(--ink);
+            padding: 0 40px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 20px;
         }
-
-        .upload-box {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 40px 20px;
+        .masthead-left {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 16px 0;
+            line-height: 2.2;
+        }
+        .masthead-center {
             text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            border-left: 1px solid var(--ink);
+            border-right: 1px solid var(--ink);
+            padding: 14px 40px;
+        }
+        .masthead-center h1 {
+            font-family: var(--display);
+            font-size: clamp(3.5rem, 8vw, 7rem);
+            letter-spacing: 0.05em;
+            line-height: 0.9;
+            color: var(--ink);
+        }
+        .masthead-right {
+            text-align: right;
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            padding: 16px 0 16px 0;
+            padding-top: 52px;
+        }
+        .masthead-tagline {
+            font-family: var(--serif);
+            font-style: italic;
+            font-size: 0.8rem;
+            color: var(--muted);
+            letter-spacing: 0.02em;
+            margin-top: 2px;
         }
 
-        .upload-box:hover {
-            border-color: var(--border-hover);
-            background: var(--bg-tertiary);
-        }
-
-        .upload-box.loaded {
-            border-color: var(--success);
-            background: rgba(34, 197, 94, 0.05);
-        }
-
-        .upload-box.error {
-            border-color: var(--error);
-            background: rgba(239, 68, 68, 0.05);
-        }
-
-        .upload-box h3 {
-            color: var(--text-primary);
-            margin: 12px 0 8px;
-            font-size: 1em;
-            font-weight: 600;
-        }
-
-        .upload-box p {
-            color: var(--text-tertiary);
-            font-size: 0.85em;
-        }
-
-        .icon {
-            font-size: 2em;
-            margin-bottom: 8px;
-            opacity: 0.6;
-            color: var(--text-tertiary);
-            transition: color 0.3s ease;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 16px;
-            font-size: 0.95em;
-            font-weight: 600;
-            background: var(--text-primary);
-            color: var(--bg-primary);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover:not(:disabled) {
-            opacity: 0.9;
-        }
-
-        .btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            border-color: var(--border-hover);
-            background: var(--bg-tertiary);
-        }
-
-        .btn-small {
-            width: auto;
-            padding: 8px 16px;
-            font-size: 0.85em;
-        }
-
-        .debug-info {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 12px;
-            margin: 16px 0;
-            font-family: 'SF Mono', 'Monaco', monospace;
-            font-size: 0.8em;
-            color: var(--success);
-            display: none;
-            border: 1px solid var(--border-color);
-        }
-
-        .results {
-            display: none;
-        }
-
-        /* Statistics Section */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 24px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            border-color: var(--border-hover);
-        }
-
-        .stat-card .icon {
-            font-size: 1.5em;
-        }
-
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 8px 0;
-            letter-spacing: -0.02em;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-            font-weight: 500;
-        }
-
-        /* Extended Stats */
-        .extended-stats {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-        }
-
-        .extended-stats h3 {
-            color: var(--text-primary);
-            margin-bottom: 20px;
-            font-size: 1em;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .stat-item-label {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-        }
-
-        .stat-item-value {
-            color: var(--text-primary);
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-
-        /* Chart Container */
-        .chart-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 40px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .pie-chart {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            position: relative;
-        }
-
-        .chart-legend {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9em;
-            color: var(--text-secondary);
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-        }
-
-        .legend-color.mutuals { background: var(--success); }
-        .legend-color.nfb { background: var(--error); }
-        .legend-color.fans { background: var(--accent-blue); }
-
-        /* Action Bar */
-        .action-bar {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .action-bar .btn {
-            width: auto;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        /* Search and Filter */
-        .list-controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 200px;
-            position: relative;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px 16px 12px 44px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.9em;
-            transition: all 0.2s ease;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--border-hover);
-        }
-
-        .search-box input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-        }
-
-        .sort-select {
-            padding: 12px 16px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.9em;
-            cursor: pointer;
-            min-width: 150px;
-        }
-
-        .sort-select:focus {
-            outline: none;
-            border-color: var(--border-hover);
-        }
-
-        .user-list-container {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-            transition: background 0.3s ease;
-        }
-
-        .user-list-header {
+        /* ─── DECK LINE ─── */
+        .deck-line {
+            border-bottom: 1px solid var(--ink);
+            padding: 8px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-            gap: 12px;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .deck-line .vol { color: var(--accent); font-weight: 500; }
+
+        /* ─── MAIN LAYOUT ─── */
+        .wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 40px 60px;
         }
 
-        .user-list-container h3 {
-            color: var(--text-primary);
-            font-size: 1em;
-            font-weight: 600;
+        /* ─── UPLOAD SCREEN ─── */
+        #upload-screen { padding-top: 48px; }
+
+        .how-to {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border: 2px solid var(--ink);
+            margin-bottom: 40px;
+        }
+        .how-to-header {
+            grid-column: 1 / -1;
+            border-bottom: 2px solid var(--ink);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .how-to-header h2 {
+            font-family: var(--display);
+            font-size: 1.4rem;
+            letter-spacing: 0.08em;
+        }
+        .how-to-header .section-num {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 2px 6px;
+            letter-spacing: 0.1em;
+        }
+        .how-to-body {
+            padding: 14px 20px;
+        }
+        .how-to-body:first-of-type {
+            border-right: 1px solid var(--ink);
+        }
+        .how-to-body ol {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .how-to-body ol li {
+            font-size: 0.78rem;
+            line-height: 1.45;
+            color: var(--ink);
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+        }
+        .how-to-body ol li span {
+            flex: 1;
+        }
+        .how-to-body ol li::before {
+            content: attr(data-n);
+            font-family: var(--display);
+            font-size: 1.1rem;
+            color: var(--accent);
+            min-width: 18px;
+            line-height: 1.2;
+        }
+        code {
+            font-family: var(--mono);
+            font-size: 0.82em;
+            background: var(--paper-2);
+            border: 1px solid var(--accent-2);
+            padding: 0 3px;
+            color: var(--accent-2);
+            vertical-align: middle;
+            line-height: 1;
+            display: inline;
+            white-space: nowrap;
+        }
+        .privacy-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--success);
+            border: 1px solid var(--success);
+            padding: 4px 10px;
+        }
+        .privacy-pill i { font-size: 0.7em; }
+
+        /* ─── UPLOAD BOXES ─── */
+        .upload-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border: 2px solid var(--ink);
+            margin-bottom: 24px;
+        }
+        .upload-zone {
+            padding: 48px 32px;
+            cursor: pointer;
+            transition: background 0.15s;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid var(--ink);
+        }
+        .upload-zone:last-child { border-right: none; }
+        .upload-zone:hover { background: var(--paper-2); }
+        .upload-zone.loaded { background: color-mix(in srgb, var(--success) 8%, var(--paper)); }
+        .upload-zone.error { background: color-mix(in srgb, var(--accent) 8%, var(--paper)); }
+
+        .upload-zone input[type="file"] { display: none; }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            display: block;
+            color: var(--muted);
+            transition: color 0.2s;
+        }
+        .upload-zone:hover .upload-icon { color: var(--ink); }
+        .upload-zone.loaded .upload-icon { color: var(--success); }
+        .upload-zone.error .upload-icon { color: var(--accent); }
+
+        .upload-label {
+            font-family: var(--display);
+            font-size: 2rem;
+            letter-spacing: 0.08em;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .upload-hint {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+        }
+        .upload-status {
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            margin-top: 12px;
+            color: var(--success);
+            font-weight: 500;
+        }
+        .upload-zone.error .upload-status { color: var(--accent); }
+
+        .upload-corner {
+            position: absolute;
+            top: 12px; right: 12px;
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ─── DEBUG ─── */
+        .debug-bar {
+            display: none;
+            border: 1px solid var(--success);
+            background: color-mix(in srgb, var(--success) 5%, var(--paper));
+            padding: 10px 16px;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--success);
+            margin-bottom: 16px;
+        }
+
+        /* ─── BUTTONS ─── */
+        .btn-analyze {
+            width: 100%;
+            padding: 20px;
+            font-family: var(--display);
+            font-size: 2rem;
+            letter-spacing: 0.1em;
+            background: var(--ink);
+            color: var(--paper);
+            border: 2px solid var(--ink);
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-analyze::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent);
+            transform: translateX(-101%);
+            transition: transform 0.2s ease;
+        }
+        .btn-analyze:hover::after { transform: translateX(0); }
+        .btn-analyze span { position: relative; z-index: 1; }
+        .btn-analyze:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+        .btn-analyze:disabled::after { display: none; }
+
+        .btn {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 10px 18px;
+            border: 1px solid var(--ink);
+            background: transparent;
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:hover { background: var(--ink); color: var(--paper); }
+        .btn.btn-accent { border-color: var(--accent); color: var(--accent); }
+        .btn.btn-accent:hover { background: var(--accent); color: white; }
+        .btn.btn-small { padding: 7px 12px; font-size: 0.68rem; }
+
+        /* ─── RESULTS SCREEN ─── */
+        #results-screen { display: none; padding-top: 40px; }
+
+        /* ─── MEGA STATS ─── */
+        .mega-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 2px solid var(--ink);
+            margin-bottom: 32px;
+        }
+        .mega-stat {
+            padding: 32px 28px;
+            border-right: 1px solid var(--ink);
+            position: relative;
+            overflow: hidden;
+        }
+        .mega-stat:last-child { border-right: none; }
+        .mega-stat::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 3px;
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+            transform-origin: left;
+        }
+        .mega-stat:hover::before { transform: scaleX(1); }
+        .mega-stat.mutuals::before { background: var(--success); }
+        .mega-stat.nfb::before { background: var(--accent); }
+        .mega-stat.fans::before { background: var(--accent-2); }
+
+        .mega-stat-category {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        .mega-stat-number {
+            font-family: var(--display);
+            font-size: clamp(3.5rem, 6vw, 5.5rem);
+            line-height: 0.9;
+            letter-spacing: 0.02em;
+            animation: countUp 0.6s ease-out both;
+        }
+        .mega-stat.mutuals .mega-stat-number { color: var(--success); }
+        .mega-stat.nfb .mega-stat-number { color: var(--accent); }
+        .mega-stat.fans .mega-stat-number { color: var(--accent-2); }
+
+        .mega-stat-label {
+            font-family: var(--serif);
+            font-style: italic;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── DETAIL ROW ─── */
+        .detail-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0;
+            border: 2px solid var(--ink);
+            margin-bottom: 32px;
+        }
+        .detail-stats {
+            padding: 24px 28px;
+            border-right: 1px solid var(--ink);
+        }
+        .detail-stats h3 {
+            font-family: var(--display);
+            font-size: 1.2rem;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-rows {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .stat-item-label {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+        .stat-item-value {
+            font-family: var(--display);
+            font-size: 1.8rem;
+            letter-spacing: 0.04em;
+            line-height: 1;
+        }
+
+        /* ─── CHART ─── */
+        .chart-panel {
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .chart-panel h3 {
+            font-family: var(--display);
+            font-size: 1.2rem;
+            letter-spacing: 0.08em;
+            width: 100%;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 10px;
+            margin-bottom: 4px;
+        }
+        .pie-chart {
+            width: 140px; height: 140px;
+            border-radius: 50%;
+            border: 2px solid var(--ink);
+        }
+        .chart-legend {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .legend-item {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin: 0;
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.05em;
+            color: var(--ink);
+        }
+        .legend-dot {
+            width: 10px; height: 10px;
+            flex-shrink: 0;
+        }
+        .legend-dot.mutuals { background: var(--success); }
+        .legend-dot.nfb { background: var(--accent); }
+        .legend-dot.fans { background: var(--accent-2); }
+
+        /* ─── SNAPSHOT SECTION ─── */
+        .snapshot-panel {
+            border: 2px solid var(--ink);
+            margin-bottom: 32px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--ink);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .panel-header h3 {
+            font-family: var(--display);
+            font-size: 1.3rem;
+            letter-spacing: 0.08em;
+        }
+        .panel-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .panel-body { padding: 20px; }
+
+        .snapshot-list { display: flex; flex-direction: column; gap: 8px; }
+        .snapshot-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border: 1px solid var(--rule);
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            gap: 12px;
+        }
+        .snapshot-name { color: var(--ink); font-weight: 500; }
+        .snapshot-date { color: var(--muted); font-size: 0.68rem; }
+        .snapshot-item-actions { display: flex; gap: 6px; }
+
+        .empty-snap {
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--muted);
+            padding: 20px;
+            border: 1px dashed var(--rule);
+            text-align: center;
         }
 
-        .header-actions {
-            display: flex;
-            gap: 8px;
+        .comparison-results {
+            display: none;
+            margin-top: 16px;
+            border: 1px solid var(--accent);
         }
+        .comparison-results .comp-header {
+            padding: 8px 14px;
+            background: var(--accent);
+            color: white;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .comp-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--rule);
+            font-family: var(--mono);
+            font-size: 0.78rem;
+        }
+        .comp-row:last-child { border-bottom: none; }
+        .comp-label { color: var(--muted); }
+        .comp-val { font-weight: 500; }
+        .comp-val.positive { color: var(--success); }
+        .comp-val.negative { color: var(--accent); }
+
+        /* ─── ACTION BAR ─── */
+        .action-bar {
+            display: flex;
+            gap: 0;
+            border: 2px solid var(--ink);
+            margin-bottom: 32px;
+        }
+        .action-bar .btn {
+            border: none;
+            border-right: 1px solid var(--ink);
+            flex: 1;
+            justify-content: center;
+            padding: 14px 16px;
+            border-radius: 0;
+        }
+        .action-bar .btn:last-child { border-right: none; }
+        .action-bar .btn:hover { background: var(--ink); color: var(--paper); }
+
+        /* ─── UNFOLLOW HELPER ─── */
+        .unfollow-panel {
+            display: none;
+            border: 2px solid var(--accent);
+            margin-bottom: 32px;
+        }
+        .unfollow-panel .panel-header { border-color: var(--accent); }
+        .unfollow-panel .panel-header h3 { color: var(--accent); }
+        .unfollow-panel textarea {
+            width: 100%;
+            height: 180px;
+            background: var(--paper-2);
+            border: 1px solid var(--rule);
+            padding: 12px;
+            color: var(--ink);
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            resize: vertical;
+            display: block;
+        }
+        .unfollow-panel textarea:focus { outline: none; border-color: var(--accent); }
+        .unfollow-note {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        /* ─── LIST CONTROLS ─── */
+        .list-controls {
+            display: flex;
+            gap: 0;
+            border: 2px solid var(--ink);
+            border-bottom: none;
+        }
+        .search-wrap {
+            flex: 1;
+            position: relative;
+            border-right: 1px solid var(--ink);
+        }
+        .search-wrap i {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+        .search-wrap input {
+            width: 100%;
+            padding: 12px 14px 12px 38px;
+            background: transparent;
+            border: none;
+            color: var(--ink);
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            letter-spacing: 0.03em;
+        }
+        .search-wrap input:focus { outline: none; background: var(--paper-2); }
+        .search-wrap input::placeholder { color: var(--muted); }
+        .sort-select {
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            color: var(--ink);
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            min-width: 160px;
+        }
+        .sort-select:focus { outline: none; }
+
+        /* ─── USER LISTS ─── */
+        .user-list-panel {
+            border: 2px solid var(--ink);
+            margin-bottom: 16px;
+        }
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--ink);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .list-header h3 {
+            font-family: var(--display);
+            font-size: 1.3rem;
+            letter-spacing: 0.08em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .list-count {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border: 1px solid currentColor;
+        }
+        .list-header.nfb h3 { color: var(--accent); }
+        .list-header.fans h3 { color: var(--accent-2); }
+        .list-header.mutuals h3 { color: var(--success); }
 
         .user-list {
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            padding: 0;
-            max-height: 400px;
+            max-height: 380px;
             overflow-y: auto;
-            border: 1px solid var(--border-color);
+            background: var(--paper);
         }
-
-        .user-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .user-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .user-list::-webkit-scrollbar-thumb {
-            background: var(--scrollbar);
-            border-radius: 4px;
-        }
-
-        .user-list::-webkit-scrollbar-thumb:hover {
-            background: var(--scrollbar-hover);
-        }
+        .user-list::-webkit-scrollbar { width: 4px; }
+        .user-list::-webkit-scrollbar-track { background: transparent; }
+        .user-list::-webkit-scrollbar-thumb { background: var(--muted); }
 
         .user-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            transition: background 0.15s ease;
+            padding: 11px 20px;
+            border-bottom: 1px solid var(--rule);
+            transition: background 0.1s;
         }
-
-        .user-item:hover {
-            background: var(--bg-secondary);
-        }
-
-        .user-item:last-child {
-            border-bottom: none;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
+        .user-item:last-child { border-bottom: none; }
+        .user-item:hover { background: var(--paper-2); }
 
         .username {
-            color: var(--text-primary);
-            font-family: 'SF Mono', 'Monaco', monospace;
-            font-size: 0.9em;
-            opacity: 0.9;
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            color: var(--ink);
         }
-
         .user-date {
-            color: var(--text-muted);
-            font-size: 0.75em;
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            color: var(--muted);
+            margin-top: 2px;
         }
 
-        .profile-link {
-            color: var(--text-secondary);
+        .view-link {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
             text-decoration: none;
-            font-size: 0.85em;
-            transition: color 0.2s;
-            font-weight: 500;
+            border-bottom: 1px solid transparent;
+            transition: all 0.15s;
         }
+        .view-link:hover { color: var(--ink); border-color: var(--ink); }
 
-        .profile-link:hover {
-            color: var(--text-primary);
-        }
-
-        .empty-message {
+        .empty-list {
             text-align: center;
-            color: var(--text-muted);
             padding: 40px;
-            font-size: 0.9em;
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            color: var(--muted);
         }
 
-        /* Toast notification */
+        /* ─── RESET BUTTON ─── */
+        .btn-reset {
+            width: 100%;
+            padding: 16px;
+            font-family: var(--display);
+            font-size: 1.4rem;
+            letter-spacing: 0.1em;
+            background: transparent;
+            color: var(--ink);
+            border: 2px solid var(--ink);
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-top: 8px;
+        }
+        .btn-reset:hover { background: var(--ink); color: var(--paper); }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            border-top: 2px solid var(--ink);
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 40px;
+        }
+        .footer-left {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .donate-strip {
+            display: flex;
+            gap: 8px;
+        }
+        .donate-link {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 8px 14px;
+            border: 1px solid var(--ink);
+            color: var(--ink);
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .donate-link:hover { background: var(--ink); color: var(--paper); }
+        .donate-link.coffee:hover { background: #FFDD00; border-color: #FFDD00; color: #000; }
+        .donate-link.paypal:hover { background: #0070BA; border-color: #0070BA; color: white; }
+
+        /* ─── TOAST ─── */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 28px;
             left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--text-primary);
-            color: var(--bg-primary);
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            font-weight: 500;
-            z-index: 1001;
-            transition: transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--ink);
+            color: var(--paper);
+            padding: 10px 22px;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            z-index: 9998;
+            transition: transform 0.25s ease;
+            display: flex; align-items: center; gap: 8px;
+            border-left: 4px solid var(--accent);
         }
+        .toast.show { transform: translateX(-50%) translateY(0); }
 
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .privacy-notice {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 32px;
-            text-align: center;
-        }
-
-        .privacy-notice p {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-        }
-
-        /* Snapshot Section */
-        .snapshot-section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .snapshot-section h3 {
-            color: var(--text-primary);
-            font-size: 1em;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .snapshot-actions {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .snapshot-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .snapshot-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .snapshot-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .snapshot-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .snapshot-name {
-            color: var(--text-primary);
-            font-weight: 500;
-            font-size: 0.9em;
-        }
-
-        .snapshot-date {
-            color: var(--text-muted);
-            font-size: 0.8em;
-        }
-
-        .snapshot-item-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .snapshot-item-actions button {
-            padding: 6px 12px;
-            font-size: 0.8em;
-        }
-
-        /* Comparison Results */
-        .comparison-results {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 16px;
-            display: none;
-        }
-
-        .comparison-results h4 {
-            color: var(--text-primary);
-            font-size: 0.95em;
-            margin-bottom: 12px;
-        }
-
-        .comparison-stat {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9em;
-        }
-
-        .comparison-stat:last-child {
-            border-bottom: none;
-        }
-
-        .comparison-stat-label {
-            color: var(--text-secondary);
-        }
-
-        .comparison-stat-value {
-            font-weight: 600;
-        }
-
-        .comparison-stat-value.positive {
-            color: var(--success);
-        }
-
-        .comparison-stat-value.negative {
-            color: var(--error);
-        }
-
-        .comparison-stat-value.neutral {
-            color: var(--text-primary);
-        }
-
-        /* Unfollow Helper */
-        .unfollow-helper {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            display: none;
-        }
-
-        .unfollow-helper h3 {
-            color: var(--text-primary);
-            font-size: 1em;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .unfollow-helper textarea {
-            width: 100%;
-            height: 200px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            color: var(--text-primary);
-            font-family: 'SF Mono', 'Monaco', monospace;
-            font-size: 0.85em;
-            resize: vertical;
-        }
-
-        .unfollow-helper textarea:focus {
-            outline: none;
-            border-color: var(--border-hover);
-        }
-
-        .unfollow-helper p {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-            margin-bottom: 12px;
-        }
-
-        .donation-section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            margin-top: 16px;
-            text-align: center;
-        }
-
-        .donation-section h3 {
-            color: var(--text-primary);
-            font-size: 1em;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .donation-section p {
-            color: var(--text-secondary);
-            font-size: 0.85em;
-            margin-bottom: 20px;
-        }
-
-        .donation-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .donate-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9em;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-
-        .donate-btn.coffee {
-            background: #FFDD00;
-            color: #000;
-        }
-
-        .donate-btn.coffee:hover {
-            background: #FFED4E;
-            transform: translateY(-2px);
-        }
-
-        .donate-btn.paypal {
-            background: #0070BA;
-            color: white;
-        }
-
-        .donate-btn.paypal:hover {
-            background: #005A9C;
-            transform: translateY(-2px);
-        }
-
-        /* Multiple file support */
-        .multi-file-hint {
-            color: var(--text-muted);
-            font-size: 0.8em;
-            margin-top: 4px;
-        }
-
+        /* ─── RESPONSIVE ─── */
         @media (max-width: 768px) {
-            .upload-section {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 2em;
-            }
-
-            .action-bar {
-                flex-direction: column;
-            }
-
-            .action-bar .btn {
-                width: 100%;
-            }
-
-            .list-controls {
-                flex-direction: column;
-            }
-
-            .search-box {
-                width: 100%;
-            }
-
-            .sort-select {
-                width: 100%;
-            }
-
-            .user-list-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header-actions {
-                width: 100%;
-            }
-
-            .header-actions .btn {
-                flex: 1;
-            }
-
-            .chart-container {
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .stats-row {
-                grid-template-columns: 1fr;
-            }
-
-            .snapshot-actions {
-                flex-direction: column;
-            }
-
-            .snapshot-actions .btn {
-                width: 100%;
-            }
+            .masthead { padding: 0 20px; grid-template-columns: 1fr; }
+            .masthead-left, .masthead-right { display: none; }
+            .masthead-center { border: none; padding: 20px 0; }
+            .deck-line { padding: 8px 20px; }
+            .wrapper { padding: 0 20px 40px; }
+            .how-to { grid-template-columns: 1fr; }
+            .how-to-body:first-of-type { border-right: none; border-bottom: 1px solid var(--ink); }
+            .upload-row { grid-template-columns: 1fr; }
+            .upload-zone { border-right: none; border-bottom: 1px solid var(--ink); }
+            .upload-zone:last-child { border-bottom: none; }
+            .mega-stats { grid-template-columns: 1fr; }
+            .mega-stat { border-right: none; border-bottom: 1px solid var(--ink); }
+            .mega-stat:last-child { border-bottom: none; }
+            .detail-row { grid-template-columns: 1fr; }
+            .detail-stats { border-right: none; border-bottom: 1px solid var(--ink); }
+            .action-bar { flex-wrap: wrap; }
+            .action-bar .btn { flex-basis: 50%; border-bottom: 1px solid var(--ink); }
+            .footer { padding: 20px; flex-direction: column; }
         }
+
+        /* ─── ENTRANCE ANIM ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .anim-1 { animation: fadeUp 0.4s ease both 0.05s; }
+        .anim-2 { animation: fadeUp 0.4s ease both 0.15s; }
+        .anim-3 { animation: fadeUp 0.4s ease both 0.25s; }
+        .anim-4 { animation: fadeUp 0.4s ease both 0.35s; }
+        .anim-5 { animation: fadeUp 0.4s ease both 0.45s; }
     </style>
 </head>
-
 <body>
-    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-        <i class="fas fa-moon"></i>
-    </button>
 
-    <div class="toast" id="toast">
-        <i class="fas fa-check"></i>
-        <span id="toast-message">Copied to clipboard!</span>
+<button class="theme-btn" id="theme-toggle" aria-label="Toggle theme">
+    <i class="fas fa-moon"></i>
+</button>
+
+<div class="toast" id="toast">
+    <i class="fas fa-check"></i>
+    <span id="toast-message">Done</span>
+</div>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<header class="masthead">
+    <div class="masthead-left">
+        Private · Browser-only<br>
+        <span class="privacy-pill"><i class="fas fa-lock"></i> Zero Data Upload</span>
     </div>
+    <div class="masthead-center">
+        <h1>INSTALYTICS</h1>
+        <p class="masthead-tagline">The truth about who follows back</p>
+    </div>
+    <div class="masthead-right">
+        Follower Intelligence<br>
+        <span id="date-display" style="color:var(--accent)"></span>
+    </div>
+</header>
 
-    <div class="container">
-        <h1>Instalytics</h1>
-        <p class="subtitle">Analyze your follower data privately in your browser</p>
+<div class="deck-line">
+    <span>Instagram Data Analyzer · Local Processing · No Account Needed</span>
+    <span class="vol">Vol. I — Free Forever</span>
+</div>
 
-        <div id="upload-screen">
-            <div class="instructions">
-                <h2>How to get your data</h2>
+<!-- ═══════════ MAIN WRAPPER ═══════════ -->
+<div class="wrapper">
+
+    <!-- ══════ UPLOAD SCREEN ══════ -->
+    <div id="upload-screen">
+
+        <div class="how-to anim-1">
+            <div class="how-to-header">
+                <span class="section-num">STEP 0</span>
+                <h2>HOW TO GET YOUR DATA</h2>
+            </div>
+            <div class="how-to-body">
                 <ol>
-                    <li>Go to Instagram Settings → Account Center → Your Information and Permissions</li>
-                    <li>Click "Download your information" → Request a download</li>
-                    <li>Select JSON format (not HTML)</li>
-                    <li>Wait for email (usually takes a few hours)</li>
-                    <li>Download and extract the ZIP file</li>
-                    <li>Upload <code>followers_1.json</code> and <code>following.json</code> below</li>
+                    <li data-n="1"><span>Go to Instagram → Settings → Account Center</span></li>
+                    <li data-n="2"><span>Navigate to Your Information and Permissions → Download your information</span></li>
+                    <li data-n="3"><span>Request a download — choose <code>JSON</code> format (not HTML)</span></li>
+                    <li data-n="4"><span>Wait for the email notification (usually a few hours)</span></li>
                 </ol>
             </div>
-
-            <div class="upload-section">
-                <label class="upload-box" id="followers-box">
-                    <i class="fas fa-upload icon"></i>
-                    <h3 id="followers-title">Upload Followers</h3>
-                    <p id="followers-count">followers_1.json</p>
-                    <p class="multi-file-hint">Supports multiple files (followers_1.json, followers_2.json, etc.)</p>
-                    <input type="file" id="followers-input" accept=".json" multiple>
-                </label>
-
-                <label class="upload-box" id="following-box">
-                    <i class="fas fa-upload icon"></i>
-                    <h3 id="following-title">Upload Following</h3>
-                    <p id="following-count">following.json</p>
-                    <input type="file" id="following-input" accept=".json">
-                </label>
-            </div>
-
-            <div class="debug-info" id="debug-info"></div>
-
-            <button class="btn" id="analyze-btn" disabled>Analyze Data</button>
-        </div>
-
-        <div class="results" id="results-screen">
-            <div class="stats-grid">
-                <div class="stat-card mutuals">
-                    <i class="fas fa-user-friends icon"></i>
-                    <div class="stat-number" id="mutuals-count">0</div>
-                    <div class="stat-label">Mutuals</div>
-                </div>
-                <div class="stat-card nfb">
-                    <i class="fas fa-user-minus icon"></i>
-                    <div class="stat-number" id="nfb-count">0</div>
-                    <div class="stat-label">Don't Follow Back</div>
-                </div>
-                <div class="stat-card fans">
-                    <i class="fas fa-heart icon"></i>
-                    <div class="stat-number" id="fans-count">0</div>
-                    <div class="stat-label">Your Fans</div>
-                </div>
-            </div>
-
-            <!-- Extended Statistics -->
-            <div class="extended-stats">
-                <h3><i class="fas fa-chart-pie"></i> Detailed Statistics</h3>
-                <div class="stats-row">
-                    <div class="stat-item">
-                        <span class="stat-item-label">Total Followers</span>
-                        <span class="stat-item-value" id="total-followers">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-item-label">Total Following</span>
-                        <span class="stat-item-value" id="total-following">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-item-label">Follow-Back Ratio</span>
-                        <span class="stat-item-value" id="followback-ratio">0%</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-item-label">Engagement Score</span>
-                        <span class="stat-item-value" id="engagement-score">0%</span>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <div class="pie-chart" id="pie-chart"></div>
-                    <div class="chart-legend">
-                        <div class="legend-item">
-                            <div class="legend-color mutuals"></div>
-                            <span>Mutuals (<span id="legend-mutuals-pct">0</span>%)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color nfb"></div>
-                            <span>Don't Follow Back (<span id="legend-nfb-pct">0</span>%)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color fans"></div>
-                            <span>Fans (<span id="legend-fans-pct">0</span>%)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Snapshot Section -->
-            <div class="snapshot-section">
-                <h3><i class="fas fa-camera"></i> Snapshots & Comparison</h3>
-                <div class="snapshot-actions">
-                    <button class="btn btn-secondary btn-small" id="save-snapshot-btn">
-                        <i class="fas fa-save"></i> Save Current Snapshot
-                    </button>
-                    <button class="btn btn-secondary btn-small" id="clear-snapshots-btn">
-                        <i class="fas fa-trash"></i> Clear All Snapshots
-                    </button>
-                </div>
-                <div class="snapshot-list" id="snapshot-list">
-                    <div class="empty-message">No snapshots saved yet. Save a snapshot to track changes over time.</div>
-                </div>
-                <div class="comparison-results" id="comparison-results">
-                    <h4>Comparison with Previous Snapshot</h4>
-                    <div class="comparison-stat">
-                        <span class="comparison-stat-label">Followers Change</span>
-                        <span class="comparison-stat-value" id="comp-followers">0</span>
-                    </div>
-                    <div class="comparison-stat">
-                        <span class="comparison-stat-label">Following Change</span>
-                        <span class="comparison-stat-value" id="comp-following">0</span>
-                    </div>
-                    <div class="comparison-stat">
-                        <span class="comparison-stat-label">Mutuals Change</span>
-                        <span class="comparison-stat-value" id="comp-mutuals">0</span>
-                    </div>
-                    <div class="comparison-stat">
-                        <span class="comparison-stat-label">New Unfollowers</span>
-                        <span class="comparison-stat-value" id="comp-unfollowers">0</span>
-                    </div>
-                    <div class="comparison-stat">
-                        <span class="comparison-stat-label">New Followers</span>
-                        <span class="comparison-stat-value" id="comp-new-followers">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Bar -->
-            <div class="action-bar">
-                <button class="btn btn-secondary" id="export-csv-btn">
-                    <i class="fas fa-file-csv"></i> Export CSV
-                </button>
-                <button class="btn btn-secondary" id="export-json-btn">
-                    <i class="fas fa-file-code"></i> Export JSON
-                </button>
-                <button class="btn btn-secondary" id="show-unfollow-btn">
-                    <i class="fas fa-list"></i> Unfollow Helper
-                </button>
-            </div>
-
-            <!-- Unfollow Helper -->
-            <div class="unfollow-helper" id="unfollow-helper">
-                <h3><i class="fas fa-clipboard-list"></i> Batch Unfollow Helper</h3>
-                <p>Copy this list of usernames who don't follow you back. You can use this as a reference when manually unfollowing on Instagram.</p>
-                <textarea id="unfollow-list" readonly></textarea>
-                <div style="margin-top: 12px;">
-                    <button class="btn btn-small" id="copy-unfollow-btn">
-                        <i class="fas fa-copy"></i> Copy List
-                    </button>
-                </div>
-            </div>
-
-            <!-- Global Search -->
-            <div class="list-controls">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="global-search" placeholder="Search all lists...">
-                </div>
-                <select class="sort-select" id="global-sort">
-                    <option value="alpha-asc">A → Z</option>
-                    <option value="alpha-desc">Z → A</option>
-                    <option value="date-newest">Newest First</option>
-                    <option value="date-oldest">Oldest First</option>
-                </select>
-            </div>
-
-            <div class="user-list-container">
-                <div class="user-list-header">
-                    <h3><i class="fas fa-user-minus"></i> People Not Following You Back (<span id="nfb-visible-count">0</span>)</h3>
-                    <div class="header-actions">
-                        <button class="btn btn-secondary btn-small" data-copy="nfb">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-                </div>
-                <div class="user-list" id="nfb-list"></div>
-            </div>
-
-            <div class="user-list-container">
-                <div class="user-list-header">
-                    <h3><i class="fas fa-heart"></i> Your Fans (<span id="fans-visible-count">0</span>)</h3>
-                    <div class="header-actions">
-                        <button class="btn btn-secondary btn-small" data-copy="fans">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-                </div>
-                <div class="user-list" id="fans-list"></div>
-            </div>
-
-            <div class="user-list-container">
-                <div class="user-list-header">
-                    <h3><i class="fas fa-user-friends"></i> Mutual Followers (<span id="mutuals-visible-count">0</span>)</h3>
-                    <div class="header-actions">
-                        <button class="btn btn-secondary btn-small" data-copy="mutuals">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-                </div>
-                <div class="user-list" id="mutuals-list"></div>
-            </div>
-
-            <button class="btn" onclick="location.reload()">Analyze Another Account</button>
-        </div>
-
-        <div class="privacy-notice">
-            <p>All data is processed locally in your browser. Nothing is uploaded to any server.</p>
-        </div>
-
-        <div class="donation-section">
-            <h3>Enjoying this tool?</h3>
-            <p>If you found this helpful, consider supporting the project!</p>
-            <div class="donation-buttons">
-                <a href="https://www.buymeacoffee.com/erisbpdev"
-                    onclick="window.open(this.href, 'bmcPopup', 'width=500,height=700,scrollbars=yes'); return false;"
-                    class="donate-btn coffee">
-                    <i class="fas fa-coffee"></i>
-                    <span>Buy Me a Coffee</span>
-                </a>
-                <a href="https://www.paypal.com/paypalme/ErisBPDev"
-                    onclick="window.open(this.href, 'bmcPopup', 'width=500,height=700,scrollbars=yes'); return false;"
-                    class="donate-btn paypal">
-                    <i class="fab fa-paypal"></i>
-                    <span>Donate via PayPal</span>
-                </a>
+            <div class="how-to-body">
+                <ol>
+                    <li data-n="5"><span>Download and extract the ZIP archive</span></li>
+                    <li data-n="6"><span>Upload <code>followers_1.json</code> — supports multiple files (followers_2.json, etc.)</span></li>
+                    <li data-n="7"><span>Upload <code>following.json</code></span></li>
+                    <li data-n="8"><span>Hit Analyze — your data never leaves this tab.</span></li>
+                </ol>
             </div>
         </div>
+
+        <div class="upload-row anim-2">
+            <label class="upload-zone" id="followers-box">
+                <span class="upload-corner">01 / FOLLOWERS</span>
+                <i class="fas fa-user-group upload-icon"></i>
+                <span class="upload-label" id="followers-title">FOLLOWERS</span>
+                <span class="upload-hint" id="followers-count">followers_1.json · multiple files OK</span>
+                <span class="upload-status" id="followers-status"></span>
+                <input type="file" id="followers-input" accept=".json" multiple>
+            </label>
+
+            <label class="upload-zone" id="following-box">
+                <span class="upload-corner">02 / FOLLOWING</span>
+                <i class="fas fa-user-plus upload-icon"></i>
+                <span class="upload-label" id="following-title">FOLLOWING</span>
+                <span class="upload-hint" id="following-count">following.json</span>
+                <span class="upload-status" id="following-status"></span>
+                <input type="file" id="following-input" accept=".json">
+            </label>
+        </div>
+
+        <div class="debug-bar" id="debug-info"></div>
+
+        <button class="btn-analyze anim-3" id="analyze-btn" disabled>
+            <span>ANALYZE DATA →</span>
+        </button>
     </div>
 
-    <script>
-        // Data storage with timestamps
-        let followersData = []; // {username, timestamp}
-        let followingData = []; // {username, timestamp}
-        let analysisResults = {
-            mutuals: [],
-            notFollowingBack: [],
-            fans: []
-        };
+    <!-- ══════ RESULTS SCREEN ══════ -->
+    <div id="results-screen">
 
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-        const themeIcon = themeToggle.querySelector('i');
+        <!-- Mega Stats -->
+        <div class="mega-stats anim-1">
+            <div class="mega-stat mutuals">
+                <div class="mega-stat-category">Mutual Followers</div>
+                <div class="mega-stat-number" id="mutuals-count">0</div>
+                <div class="mega-stat-label">Follow each other</div>
+            </div>
+            <div class="mega-stat nfb">
+                <div class="mega-stat-category">Not Following Back</div>
+                <div class="mega-stat-number" id="nfb-count">0</div>
+                <div class="mega-stat-label">You follow · they don't</div>
+            </div>
+            <div class="mega-stat fans">
+                <div class="mega-stat-category">Your Fans</div>
+                <div class="mega-stat-number" id="fans-count">0</div>
+                <div class="mega-stat-label">They follow · you don't</div>
+            </div>
+        </div>
 
-        const currentTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', currentTheme);
-        updateThemeIcon(currentTheme);
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        });
-
-        function updateThemeIcon(theme) {
-            if (theme === 'dark') {
-                themeIcon.className = 'fas fa-moon';
-            } else {
-                themeIcon.className = 'fas fa-sun';
-            }
-        }
-
-        // Toast notification
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toast-message');
-            toastMessage.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500);
-        }
-
-        // Extract usernames with timestamps
-        function extractUsernames(data) {
-            const users = [];
-            const seen = new Set();
-
-            function recursiveExtract(obj) {
-                if (!obj) return;
-                if (Array.isArray(obj)) {
-                    obj.forEach(item => recursiveExtract(item));
-                    return;
-                }
-                if (typeof obj === 'object') {
-                    if (obj.string_list_data && Array.isArray(obj.string_list_data)) {
-                        obj.string_list_data.forEach(item => {
-                            if (item.value && !seen.has(item.value)) {
-                                seen.add(item.value);
-                                users.push({
-                                    username: item.value,
-                                    timestamp: item.timestamp ? item.timestamp * 1000 : null
-                                });
-                            }
-                        });
-                    }
-                    if (obj.username && typeof obj.username === 'string' && !seen.has(obj.username)) {
-                        seen.add(obj.username);
-                        users.push({
-                            username: obj.username,
-                            timestamp: obj.timestamp ? obj.timestamp * 1000 : null
-                        });
-                    }
-                    if (obj.title && typeof obj.title === 'string' && obj.title.length > 0 && !obj.title.includes(' ') && !seen.has(obj.title)) {
-                        seen.add(obj.title);
-                        users.push({
-                            username: obj.title,
-                            timestamp: obj.timestamp ? obj.timestamp * 1000 : null
-                        });
-                    }
-                    Object.values(obj).forEach(value => {
-                        if (typeof value === 'object') {
-                            recursiveExtract(value);
-                        }
-                    });
-                }
-            }
-            recursiveExtract(data);
-            return users;
-        }
-
-        function showDebug(message, isError = false) {
-            const debugDiv = document.getElementById('debug-info');
-            debugDiv.style.display = 'block';
-            debugDiv.style.color = isError ? '#f87171' : '#4ade80';
-            debugDiv.textContent = message;
-        }
-
-        // Multiple file support for followers
-        document.getElementById('followers-input').addEventListener('change', async function (e) {
-            const files = e.target.files;
-            if (!files.length) return;
-
-            followersData = [];
-            let totalParsed = 0;
-
-            for (const file of files) {
-                try {
-                    const text = await file.text();
-                    const data = JSON.parse(text);
-                    const extracted = extractUsernames(data);
-                    followersData = followersData.concat(extracted);
-                    totalParsed++;
-                } catch (err) {
-                    console.error(`Error parsing ${file.name}:`, err);
-                }
-            }
-
-            // Remove duplicates
-            const seen = new Set();
-            followersData = followersData.filter(u => {
-                if (seen.has(u.username)) return false;
-                seen.add(u.username);
-                return true;
-            });
-
-            if (followersData.length === 0) {
-                document.getElementById('followers-box').classList.add('error');
-            } else {
-                document.getElementById('followers-box').classList.remove('error');
-                document.getElementById('followers-box').classList.add('loaded');
-                document.getElementById('followers-title').textContent = 'Followers Loaded';
-                document.getElementById('followers-count').textContent = `${followersData.length} followers from ${totalParsed} file(s)`;
-            }
-            checkBothFilesLoaded();
-        });
-
-        document.getElementById('following-input').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    followingData = extractUsernames(data);
-                    if (followingData.length === 0) {
-                        document.getElementById('following-box').classList.add('error');
-                    } else {
-                        document.getElementById('following-box').classList.remove('error');
-                        document.getElementById('following-box').classList.add('loaded');
-                        document.getElementById('following-title').textContent = 'Following Loaded';
-                        document.getElementById('following-count').textContent = `${followingData.length} following`;
-                    }
-                    checkBothFilesLoaded();
-                } catch (err) {
-                    alert('Error parsing following file');
-                }
-            };
-            reader.readAsText(file);
-        });
-
-        function checkBothFilesLoaded() {
-            if (followersData.length > 0 && followingData.length > 0) {
-                document.getElementById('analyze-btn').disabled = false;
-            }
-        }
-
-        // Format date
-        function formatDate(timestamp) {
-            if (!timestamp) return '';
-            const date = new Date(timestamp);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        }
-
-        // Sort functions
-        function sortUsers(users, sortType) {
-            const sorted = [...users];
-            switch (sortType) {
-                case 'alpha-asc':
-                    sorted.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
-                    break;
-                case 'alpha-desc':
-                    sorted.sort((a, b) => b.username.toLowerCase().localeCompare(a.username.toLowerCase()));
-                    break;
-                case 'date-newest':
-                    sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    break;
-                case 'date-oldest':
-                    sorted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-                    break;
-            }
-            return sorted;
-        }
-
-        // Filter users by search
-        function filterUsers(users, searchTerm) {
-            if (!searchTerm) return users;
-            const term = searchTerm.toLowerCase();
-            return users.filter(u => u.username.toLowerCase().includes(term));
-        }
-
-        // Populate list with search/sort
-        function populateList(containerId, users, emptyMessage, visibleCountId) {
-            const list = document.getElementById(containerId);
-            const searchTerm = document.getElementById('global-search').value;
-            const sortType = document.getElementById('global-sort').value;
-
-            let filteredUsers = filterUsers(users, searchTerm);
-            filteredUsers = sortUsers(filteredUsers, sortType);
-
-            document.getElementById(visibleCountId).textContent = filteredUsers.length;
-
-            list.innerHTML = '';
-            if (filteredUsers.length === 0) {
-                list.innerHTML = `<div class="empty-message">${searchTerm ? 'No matching users found' : emptyMessage}</div>`;
-            } else {
-                filteredUsers.forEach(user => {
-                    const item = document.createElement('div');
-                    item.className = 'user-item';
-                    item.innerHTML = `
-                        <div class="user-info">
-                            <span class="username">@${user.username}</span>
-                            ${user.timestamp ? `<span class="user-date">${formatDate(user.timestamp)}</span>` : ''}
-                        </div>
-                        <a href="https://instagram.com/${user.username}"
-                            onclick="window.open(this.href, 'igPopup', 'width=500,height=700,scrollbars=yes'); return false;"
-                            class="profile-link">
-                            View <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
-                        </a>
-                    `;
-                    list.appendChild(item);
-                });
-            }
-        }
-
-        // Refresh all lists
-        function refreshLists() {
-            populateList('nfb-list', analysisResults.notFollowingBack, 'Everyone you follow follows you back', 'nfb-visible-count');
-            populateList('fans-list', analysisResults.fans, 'No fans found', 'fans-visible-count');
-            populateList('mutuals-list', analysisResults.mutuals, 'No mutual followers', 'mutuals-visible-count');
-        }
-
-        // Search and sort event listeners
-        document.getElementById('global-search').addEventListener('input', refreshLists);
-        document.getElementById('global-sort').addEventListener('change', refreshLists);
-
-        // Copy functionality
-        document.querySelectorAll('[data-copy]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const type = this.dataset.copy;
-                let users;
-                switch (type) {
-                    case 'nfb':
-                        users = analysisResults.notFollowingBack;
-                        break;
-                    case 'fans':
-                        users = analysisResults.fans;
-                        break;
-                    case 'mutuals':
-                        users = analysisResults.mutuals;
-                        break;
-                }
-                const text = users.map(u => u.username).join('\n');
-                navigator.clipboard.writeText(text).then(() => {
-                    showToast(`Copied ${users.length} usernames!`);
-                });
-            });
-        });
-
-        // Export functions
-        function exportToCSV() {
-            let csv = 'Category,Username,Date\n';
-
-            analysisResults.notFollowingBack.forEach(u => {
-                csv += `"Not Following Back","${u.username}","${formatDate(u.timestamp)}"\n`;
-            });
-            analysisResults.fans.forEach(u => {
-                csv += `"Fan","${u.username}","${formatDate(u.timestamp)}"\n`;
-            });
-            analysisResults.mutuals.forEach(u => {
-                csv += `"Mutual","${u.username}","${formatDate(u.timestamp)}"\n`;
-            });
-
-            downloadFile(csv, 'instalytics-export.csv', 'text/csv');
-            showToast('CSV exported successfully!');
-        }
-
-        function exportToJSON() {
-            const data = {
-                exportDate: new Date().toISOString(),
-                stats: {
-                    totalFollowers: followersData.length,
-                    totalFollowing: followingData.length,
-                    mutuals: analysisResults.mutuals.length,
-                    notFollowingBack: analysisResults.notFollowingBack.length,
-                    fans: analysisResults.fans.length
-                },
-                notFollowingBack: analysisResults.notFollowingBack,
-                fans: analysisResults.fans,
-                mutuals: analysisResults.mutuals
-            };
-
-            downloadFile(JSON.stringify(data, null, 2), 'instalytics-export.json', 'application/json');
-            showToast('JSON exported successfully!');
-        }
-
-        function downloadFile(content, filename, type) {
-            const blob = new Blob([content], { type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        document.getElementById('export-csv-btn').addEventListener('click', exportToCSV);
-        document.getElementById('export-json-btn').addEventListener('click', exportToJSON);
-
-        // Unfollow helper
-        document.getElementById('show-unfollow-btn').addEventListener('click', function() {
-            const helper = document.getElementById('unfollow-helper');
-            helper.style.display = helper.style.display === 'none' ? 'block' : 'none';
-
-            const usernames = analysisResults.notFollowingBack.map(u => u.username).join('\n');
-            document.getElementById('unfollow-list').value = usernames;
-        });
-
-        document.getElementById('copy-unfollow-btn').addEventListener('click', function() {
-            const textarea = document.getElementById('unfollow-list');
-            navigator.clipboard.writeText(textarea.value).then(() => {
-                showToast('Unfollow list copied!');
-            });
-        });
-
-        // Snapshot functionality
-        function getSnapshots() {
-            const saved = localStorage.getItem('instalytics-snapshots');
-            return saved ? JSON.parse(saved) : [];
-        }
-
-        function saveSnapshots(snapshots) {
-            localStorage.setItem('instalytics-snapshots', JSON.stringify(snapshots));
-        }
-
-        function renderSnapshots() {
-            const snapshots = getSnapshots();
-            const container = document.getElementById('snapshot-list');
-
-            if (snapshots.length === 0) {
-                container.innerHTML = '<div class="empty-message">No snapshots saved yet. Save a snapshot to track changes over time.</div>';
-                return;
-            }
-
-            container.innerHTML = snapshots.map((snap, index) => `
-                <div class="snapshot-item">
-                    <div class="snapshot-info">
-                        <span class="snapshot-name">${snap.name}</span>
-                        <span class="snapshot-date">${new Date(snap.date).toLocaleString()}</span>
+        <!-- Detail Row -->
+        <div class="detail-row anim-2">
+            <div class="detail-stats">
+                <h3>DETAILED STATISTICS</h3>
+                <div class="stat-rows">
+                    <div>
+                        <div class="stat-item-label">Total Followers</div>
+                        <div class="stat-item-value" id="total-followers">—</div>
                     </div>
-                    <div class="snapshot-item-actions">
-                        <button class="btn btn-secondary btn-small" onclick="compareSnapshot(${index})">
-                            <i class="fas fa-balance-scale"></i> Compare
-                        </button>
-                        <button class="btn btn-secondary btn-small" onclick="deleteSnapshot(${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    <div>
+                        <div class="stat-item-label">Total Following</div>
+                        <div class="stat-item-value" id="total-following">—</div>
+                    </div>
+                    <div>
+                        <div class="stat-item-label">Follow-Back Ratio</div>
+                        <div class="stat-item-value" id="followback-ratio">—</div>
+                    </div>
+                    <div>
+                        <div class="stat-item-label">Engagement Score</div>
+                        <div class="stat-item-value" id="engagement-score">—</div>
                     </div>
                 </div>
-            `).join('');
+            </div>
+            <div class="chart-panel">
+                <h3>BREAKDOWN</h3>
+                <div class="pie-chart" id="pie-chart"></div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot mutuals"></div>
+                        <span>Mutuals · <strong><span id="legend-mutuals-pct">0</span>%</strong></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot nfb"></div>
+                        <span>Not Following Back · <strong><span id="legend-nfb-pct">0</span>%</strong></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot fans"></div>
+                        <span>Fans · <strong><span id="legend-fans-pct">0</span>%</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Snapshots -->
+        <div class="snapshot-panel anim-3">
+            <div class="panel-header">
+                <h3>SNAPSHOTS &amp; COMPARISON</h3>
+                <div class="panel-header-actions">
+                    <button class="btn btn-small" id="save-snapshot-btn">
+                        <i class="fas fa-camera"></i> Save Snapshot
+                    </button>
+                    <button class="btn btn-small" id="clear-snapshots-btn">
+                        <i class="fas fa-trash"></i> Clear All
+                    </button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="snapshot-list" id="snapshot-list">
+                    <div class="empty-snap">No snapshots yet — save one to track changes over time.</div>
+                </div>
+                <div class="comparison-results" id="comparison-results">
+                    <div class="comp-header">Comparison with Previous Snapshot</div>
+                    <div class="comp-row">
+                        <span class="comp-label">Followers Change</span>
+                        <span class="comp-val" id="comp-followers">0</span>
+                    </div>
+                    <div class="comp-row">
+                        <span class="comp-label">Following Change</span>
+                        <span class="comp-val" id="comp-following">0</span>
+                    </div>
+                    <div class="comp-row">
+                        <span class="comp-label">Mutuals Change</span>
+                        <span class="comp-val" id="comp-mutuals">0</span>
+                    </div>
+                    <div class="comp-row">
+                        <span class="comp-label">New Unfollowers</span>
+                        <span class="comp-val" id="comp-unfollowers">0</span>
+                    </div>
+                    <div class="comp-row">
+                        <span class="comp-label">New Followers</span>
+                        <span class="comp-val" id="comp-new-followers">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar anim-4">
+            <button class="btn" id="export-csv-btn"><i class="fas fa-file-csv"></i> Export CSV</button>
+            <button class="btn" id="export-json-btn"><i class="fas fa-file-code"></i> Export JSON</button>
+            <button class="btn btn-accent" id="show-unfollow-btn"><i class="fas fa-list"></i> Unfollow Helper</button>
+        </div>
+
+        <!-- Unfollow Helper -->
+        <div class="unfollow-panel" id="unfollow-helper">
+            <div class="panel-header">
+                <h3>BATCH UNFOLLOW HELPER</h3>
+                <div class="panel-header-actions">
+                    <button class="btn btn-accent btn-small" id="copy-unfollow-btn"><i class="fas fa-copy"></i> Copy List</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <p class="unfollow-note">Usernames who don't follow you back. Use as reference when manually unfollowing on Instagram.</p>
+                <textarea id="unfollow-list" readonly></textarea>
+            </div>
+        </div>
+
+        <!-- List Controls -->
+        <div class="list-controls anim-5">
+            <div class="search-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="global-search" placeholder="Search all lists...">
+            </div>
+            <select class="sort-select" id="global-sort">
+                <option value="alpha-asc">A → Z</option>
+                <option value="alpha-desc">Z → A</option>
+                <option value="date-newest">Newest First</option>
+                <option value="date-oldest">Oldest First</option>
+            </select>
+        </div>
+
+        <!-- Not Following Back List -->
+        <div class="user-list-panel">
+            <div class="list-header nfb">
+                <h3>NOT FOLLOWING BACK <span class="list-count" id="nfb-visible-count">0</span></h3>
+                <button class="btn btn-small btn-accent" data-copy="nfb"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <div class="user-list" id="nfb-list"></div>
+        </div>
+
+        <!-- Fans List -->
+        <div class="user-list-panel">
+            <div class="list-header fans">
+                <h3>YOUR FANS <span class="list-count" id="fans-visible-count">0</span></h3>
+                <button class="btn btn-small" style="border-color:var(--accent-2);color:var(--accent-2)" data-copy="fans"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <div class="user-list" id="fans-list"></div>
+        </div>
+
+        <!-- Mutuals List -->
+        <div class="user-list-panel">
+            <div class="list-header mutuals">
+                <h3>MUTUAL FOLLOWERS <span class="list-count" id="mutuals-visible-count">0</span></h3>
+                <button class="btn btn-small" style="border-color:var(--success);color:var(--success)" data-copy="mutuals"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            <div class="user-list" id="mutuals-list"></div>
+        </div>
+
+        <button class="btn-reset" onclick="location.reload()">↩ ANALYZE ANOTHER ACCOUNT</button>
+    </div>
+
+</div><!-- /wrapper -->
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="footer">
+    <div class="footer-left">
+        All data processed locally · Nothing sent to any server<br>
+        © Instalytics · Free and open
+    </div>
+    <div class="donate-strip">
+        <a href="https://www.buymeacoffee.com/erisbpdev"
+           onclick="window.open(this.href,'bmc','width=500,height=700'); return false;"
+           class="donate-link coffee"><i class="fas fa-coffee"></i> Coffee</a>
+        <a href="https://www.paypal.com/paypalme/ErisBPDev"
+           onclick="window.open(this.href,'pp','width=500,height=700'); return false;"
+           class="donate-link paypal"><i class="fab fa-paypal"></i> PayPal</a>
+    </div>
+</footer>
+
+<script>
+// ─── STATE ───
+let followersData = [];
+let followingData = [];
+let analysisResults = { mutuals: [], notFollowingBack: [], fans: [] };
+
+// ─── DATE ───
+document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+
+// ─── THEME ───
+const html = document.documentElement;
+const themeBtn = document.getElementById('theme-toggle');
+const themeIcon = themeBtn.querySelector('i');
+const savedTheme = localStorage.getItem('theme') || 'dark';
+html.setAttribute('data-theme', savedTheme);
+themeIcon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+
+themeBtn.addEventListener('click', () => {
+    const t = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
+    themeIcon.className = t === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+});
+
+// ─── TOAST ───
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-message').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── EXTRACT ───
+function extractUsernames(data) {
+    const users = [], seen = new Set();
+    function recurse(obj) {
+        if (!obj) return;
+        if (Array.isArray(obj)) { obj.forEach(recurse); return; }
+        if (typeof obj === 'object') {
+            if (obj.string_list_data && Array.isArray(obj.string_list_data)) {
+                obj.string_list_data.forEach(item => {
+                    if (item.value && !seen.has(item.value)) {
+                        seen.add(item.value);
+                        users.push({ username: item.value, timestamp: item.timestamp ? item.timestamp * 1000 : null });
+                    }
+                });
+            }
+            if (obj.username && typeof obj.username === 'string' && !seen.has(obj.username)) {
+                seen.add(obj.username);
+                users.push({ username: obj.username, timestamp: obj.timestamp ? obj.timestamp * 1000 : null });
+            }
+            if (obj.title && typeof obj.title === 'string' && obj.title.length > 0 && !obj.title.includes(' ') && !seen.has(obj.title)) {
+                seen.add(obj.title);
+                users.push({ username: obj.title, timestamp: obj.timestamp ? obj.timestamp * 1000 : null });
+            }
+            Object.values(obj).forEach(v => { if (typeof v === 'object') recurse(v); });
         }
+    }
+    recurse(data);
+    return users;
+}
 
-        document.getElementById('save-snapshot-btn').addEventListener('click', function() {
-            const snapshots = getSnapshots();
-            const name = `Snapshot ${snapshots.length + 1}`;
+// ─── FILE HANDLERS ───
+document.getElementById('followers-input').addEventListener('change', async function(e) {
+    const files = e.target.files;
+    if (!files.length) return;
+    followersData = [];
+    let total = 0;
+    for (const file of files) {
+        try {
+            const data = JSON.parse(await file.text());
+            followersData = followersData.concat(extractUsernames(data));
+            total++;
+        } catch(err) { console.error(err); }
+    }
+    const seen = new Set();
+    followersData = followersData.filter(u => { if (seen.has(u.username)) return false; seen.add(u.username); return true; });
+    const box = document.getElementById('followers-box');
+    if (followersData.length === 0) {
+        box.className = 'upload-zone error';
+        document.getElementById('followers-status').textContent = 'Could not parse file(s)';
+    } else {
+        box.className = 'upload-zone loaded';
+        document.getElementById('followers-title').textContent = 'FOLLOWERS ✓';
+        document.getElementById('followers-count').textContent = `${followersData.length.toLocaleString()} followers · ${total} file(s)`;
+        document.getElementById('followers-status').textContent = '';
+    }
+    checkReady();
+});
 
-            snapshots.push({
-                name,
-                date: new Date().toISOString(),
-                data: {
-                    followers: followersData.map(u => u.username),
-                    following: followingData.map(u => u.username),
-                    mutuals: analysisResults.mutuals.length,
-                    notFollowingBack: analysisResults.notFollowingBack.length,
-                    fans: analysisResults.fans.length
-                }
-            });
+document.getElementById('following-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        try {
+            followingData = extractUsernames(JSON.parse(ev.target.result));
+            const box = document.getElementById('following-box');
+            if (followingData.length === 0) {
+                box.className = 'upload-zone error';
+                document.getElementById('following-status').textContent = 'Could not parse file';
+            } else {
+                box.className = 'upload-zone loaded';
+                document.getElementById('following-title').textContent = 'FOLLOWING ✓';
+                document.getElementById('following-count').textContent = `${followingData.length.toLocaleString()} following`;
+            }
+            checkReady();
+        } catch(err) { alert('Error parsing following file'); }
+    };
+    reader.readAsText(file);
+});
 
-            saveSnapshots(snapshots);
-            renderSnapshots();
-            showToast('Snapshot saved!');
+function checkReady() {
+    document.getElementById('analyze-btn').disabled = !(followersData.length > 0 && followingData.length > 0);
+}
+
+// ─── FORMAT ───
+function formatDate(ts) {
+    if (!ts) return '';
+    return new Date(ts).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+}
+
+// ─── SORT / FILTER ───
+function sortUsers(users, type) {
+    const s = [...users];
+    if (type === 'alpha-asc') s.sort((a,b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
+    else if (type === 'alpha-desc') s.sort((a,b) => b.username.toLowerCase().localeCompare(a.username.toLowerCase()));
+    else if (type === 'date-newest') s.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+    else if (type === 'date-oldest') s.sort((a,b) => (a.timestamp||0) - (b.timestamp||0));
+    return s;
+}
+function filterUsers(users, term) {
+    if (!term) return users;
+    const t = term.toLowerCase();
+    return users.filter(u => u.username.toLowerCase().includes(t));
+}
+
+function populateList(containerId, users, emptyMsg, countId) {
+    const list = document.getElementById(containerId);
+    const term = document.getElementById('global-search').value;
+    const sort = document.getElementById('global-sort').value;
+    let filtered = sortUsers(filterUsers(users, term), sort);
+    document.getElementById(countId).textContent = filtered.length.toLocaleString();
+    list.innerHTML = '';
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-list">${term ? 'No matching users' : emptyMsg}</div>`;
+    } else {
+        filtered.forEach(u => {
+            const el = document.createElement('div');
+            el.className = 'user-item';
+            el.innerHTML = `
+                <div>
+                    <div class="username">@${u.username}</div>
+                    ${u.timestamp ? `<div class="user-date">${formatDate(u.timestamp)}</div>` : ''}
+                </div>
+                <a href="https://instagram.com/${u.username}"
+                   onclick="window.open(this.href,'ig','width=500,height=700'); return false;"
+                   class="view-link">View ↗</a>`;
+            list.appendChild(el);
         });
+    }
+}
 
-        document.getElementById('clear-snapshots-btn').addEventListener('click', function() {
-            if (confirm('Are you sure you want to delete all snapshots?')) {
-                localStorage.removeItem('instalytics-snapshots');
-                renderSnapshots();
-                document.getElementById('comparison-results').style.display = 'none';
-                showToast('All snapshots cleared!');
-            }
-        });
+function refreshLists() {
+    populateList('nfb-list', analysisResults.notFollowingBack, 'Everyone you follow follows you back', 'nfb-visible-count');
+    populateList('fans-list', analysisResults.fans, 'No fans found', 'fans-visible-count');
+    populateList('mutuals-list', analysisResults.mutuals, 'No mutual followers', 'mutuals-visible-count');
+}
 
-        window.compareSnapshot = function(index) {
-            const snapshots = getSnapshots();
-            const oldSnap = snapshots[index];
-            const results = document.getElementById('comparison-results');
+document.getElementById('global-search').addEventListener('input', refreshLists);
+document.getElementById('global-sort').addEventListener('change', refreshLists);
 
-            const oldFollowers = new Set(oldSnap.data.followers);
-            const oldFollowing = new Set(oldSnap.data.following);
-            const currentFollowers = new Set(followersData.map(u => u.username));
-            const currentFollowing = new Set(followingData.map(u => u.username));
+// ─── COPY ───
+document.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const type = this.dataset.copy;
+        const users = type === 'nfb' ? analysisResults.notFollowingBack
+                    : type === 'fans' ? analysisResults.fans
+                    : analysisResults.mutuals;
+        navigator.clipboard.writeText(users.map(u => u.username).join('\n'))
+            .then(() => showToast(`Copied ${users.length} usernames`));
+    });
+});
 
-            // Calculate changes
-            const followersDiff = currentFollowers.size - oldFollowers.size;
-            const followingDiff = currentFollowing.size - oldFollowing.size;
-            const mutualsDiff = analysisResults.mutuals.length - oldSnap.data.mutuals;
+// ─── EXPORT ───
+function dlFile(content, name, type) {
+    const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(new Blob([content], {type})),
+        download: name
+    });
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+document.getElementById('export-csv-btn').addEventListener('click', () => {
+    let csv = 'Category,Username,Date\n';
+    analysisResults.notFollowingBack.forEach(u => csv += `"Not Following Back","${u.username}","${formatDate(u.timestamp)}"\n`);
+    analysisResults.fans.forEach(u => csv += `"Fan","${u.username}","${formatDate(u.timestamp)}"\n`);
+    analysisResults.mutuals.forEach(u => csv += `"Mutual","${u.username}","${formatDate(u.timestamp)}"\n`);
+    dlFile(csv, 'instalytics.csv', 'text/csv');
+    showToast('CSV exported');
+});
+document.getElementById('export-json-btn').addEventListener('click', () => {
+    const d = { exportDate: new Date().toISOString(), stats: {
+        totalFollowers: followersData.length, totalFollowing: followingData.length,
+        mutuals: analysisResults.mutuals.length, notFollowingBack: analysisResults.notFollowingBack.length, fans: analysisResults.fans.length
+    }, notFollowingBack: analysisResults.notFollowingBack, fans: analysisResults.fans, mutuals: analysisResults.mutuals };
+    dlFile(JSON.stringify(d, null, 2), 'instalytics.json', 'application/json');
+    showToast('JSON exported');
+});
 
-            // Find who unfollowed
-            const unfollowers = [...oldFollowers].filter(u => !currentFollowers.has(u));
-            // Find new followers
-            const newFollowers = [...currentFollowers].filter(u => !oldFollowers.has(u));
+// ─── UNFOLLOW HELPER ───
+document.getElementById('show-unfollow-btn').addEventListener('click', function() {
+    const panel = document.getElementById('unfollow-helper');
+    const visible = panel.style.display !== 'block';
+    panel.style.display = visible ? 'block' : 'none';
+    if (visible) document.getElementById('unfollow-list').value = analysisResults.notFollowingBack.map(u => u.username).join('\n');
+});
+document.getElementById('copy-unfollow-btn').addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('unfollow-list').value)
+        .then(() => showToast('Unfollow list copied'));
+});
 
-            // Update display
-            function formatChange(value) {
-                if (value > 0) return `+${value}`;
-                return value.toString();
-            }
+// ─── PIE CHART ───
+function drawPie(m, n, f) {
+    const total = m + n + f;
+    if (!total) return;
+    const ma = (m/total)*360, na = (n/total)*360;
+    const c = document.getElementById('pie-chart');
+    // Use CSS variables resolved values
+    const cs = getComputedStyle(document.documentElement);
+    const green = cs.getPropertyValue('--success').trim();
+    const red = cs.getPropertyValue('--accent').trim();
+    const blue = cs.getPropertyValue('--accent-2').trim();
+    c.style.background = `conic-gradient(${green} 0deg ${ma}deg, ${red} ${ma}deg ${ma+na}deg, ${blue} ${ma+na}deg 360deg)`;
+    document.getElementById('legend-mutuals-pct').textContent = Math.round((m/total)*100);
+    document.getElementById('legend-nfb-pct').textContent = Math.round((n/total)*100);
+    document.getElementById('legend-fans-pct').textContent = Math.round((f/total)*100);
+}
 
-            function getClass(value) {
-                if (value > 0) return 'positive';
-                if (value < 0) return 'negative';
-                return 'neutral';
-            }
+// ─── SNAPSHOTS ───
+function getSnaps() { try { return JSON.parse(localStorage.getItem('instalytics-snapshots') || '[]'); } catch(e) { return []; } }
+function saveSnaps(s) { localStorage.setItem('instalytics-snapshots', JSON.stringify(s)); }
 
-            document.getElementById('comp-followers').textContent = formatChange(followersDiff);
-            document.getElementById('comp-followers').className = `comparison-stat-value ${getClass(followersDiff)}`;
+function renderSnaps() {
+    const snaps = getSnaps();
+    const el = document.getElementById('snapshot-list');
+    if (!snaps.length) {
+        el.innerHTML = '<div class="empty-snap">No snapshots yet — save one to track changes over time.</div>';
+        return;
+    }
+    el.innerHTML = snaps.map((s, i) => `
+        <div class="snapshot-item">
+            <div>
+                <div class="snapshot-name">${s.name}</div>
+                <div class="snapshot-date">${new Date(s.date).toLocaleString()}</div>
+            </div>
+            <div class="snapshot-item-actions">
+                <button class="btn btn-small" onclick="compareSnap(${i})"><i class="fas fa-balance-scale"></i> Compare</button>
+                <button class="btn btn-small" onclick="deleteSnap(${i})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`).join('');
+}
 
-            document.getElementById('comp-following').textContent = formatChange(followingDiff);
-            document.getElementById('comp-following').className = `comparison-stat-value ${getClass(followingDiff)}`;
-
-            document.getElementById('comp-mutuals').textContent = formatChange(mutualsDiff);
-            document.getElementById('comp-mutuals').className = `comparison-stat-value ${getClass(mutualsDiff)}`;
-
-            document.getElementById('comp-unfollowers').textContent = unfollowers.length;
-            document.getElementById('comp-unfollowers').className = `comparison-stat-value ${unfollowers.length > 0 ? 'negative' : 'neutral'}`;
-
-            document.getElementById('comp-new-followers').textContent = newFollowers.length;
-            document.getElementById('comp-new-followers').className = `comparison-stat-value ${newFollowers.length > 0 ? 'positive' : 'neutral'}`;
-
-            results.style.display = 'block';
-        };
-
-        window.deleteSnapshot = function(index) {
-            const snapshots = getSnapshots();
-            snapshots.splice(index, 1);
-            saveSnapshots(snapshots);
-            renderSnapshots();
-            showToast('Snapshot deleted!');
-        };
-
-        // Draw pie chart
-        function drawPieChart(mutuals, nfb, fans) {
-            const total = mutuals + nfb + fans;
-            if (total === 0) return;
-
-            const mutualsAngle = (mutuals / total) * 360;
-            const nfbAngle = (nfb / total) * 360;
-            const fansAngle = (fans / total) * 360;
-
-            const chart = document.getElementById('pie-chart');
-            chart.style.background = `conic-gradient(
-                var(--success) 0deg ${mutualsAngle}deg,
-                var(--error) ${mutualsAngle}deg ${mutualsAngle + nfbAngle}deg,
-                var(--accent-blue) ${mutualsAngle + nfbAngle}deg 360deg
-            )`;
-
-            // Update legend percentages
-            document.getElementById('legend-mutuals-pct').textContent = Math.round((mutuals / total) * 100);
-            document.getElementById('legend-nfb-pct').textContent = Math.round((nfb / total) * 100);
-            document.getElementById('legend-fans-pct').textContent = Math.round((fans / total) * 100);
+document.getElementById('save-snapshot-btn').addEventListener('click', () => {
+    const snaps = getSnaps();
+    snaps.push({
+        name: `Snapshot ${snaps.length + 1}`,
+        date: new Date().toISOString(),
+        data: {
+            followers: followersData.map(u => u.username),
+            following: followingData.map(u => u.username),
+            mutuals: analysisResults.mutuals.length,
+            notFollowingBack: analysisResults.notFollowingBack.length,
+            fans: analysisResults.fans.length
         }
+    });
+    saveSnaps(snaps); renderSnaps(); showToast('Snapshot saved');
+});
 
-        // Main analyze function
-        document.getElementById('analyze-btn').addEventListener('click', function () {
-            const followersSet = new Set(followersData.map(u => u.username));
-            const followingSet = new Set(followingData.map(u => u.username));
+document.getElementById('clear-snapshots-btn').addEventListener('click', () => {
+    if (confirm('Delete all snapshots?')) {
+        localStorage.removeItem('instalytics-snapshots');
+        renderSnaps();
+        document.getElementById('comparison-results').style.display = 'none';
+        showToast('Snapshots cleared');
+    }
+});
 
-            // Create maps for quick timestamp lookup
-            const followersMap = new Map(followersData.map(u => [u.username, u]));
-            const followingMap = new Map(followingData.map(u => [u.username, u]));
+window.compareSnap = function(i) {
+    const snap = getSnaps()[i];
+    const cf = new Set(followersData.map(u => u.username));
+    const cfo = new Set(followingData.map(u => u.username));
+    const of = new Set(snap.data.followers);
+    const ofo = new Set(snap.data.following);
+    const fmtChg = v => v > 0 ? `+${v}` : `${v}`;
+    const cls = v => v > 0 ? 'positive' : v < 0 ? 'negative' : '';
+    const fd = cf.size - of.size, fod = cfo.size - ofo.size, md = analysisResults.mutuals.length - snap.data.mutuals;
+    const unf = [...of].filter(u => !cf.has(u));
+    const nwf = [...cf].filter(u => !of.has(u));
+    [['comp-followers', fd], ['comp-following', fod], ['comp-mutuals', md]].forEach(([id, v]) => {
+        const el = document.getElementById(id); el.textContent = fmtChg(v); el.className = `comp-val ${cls(v)}`;
+    });
+    const eu = document.getElementById('comp-unfollowers');
+    eu.textContent = unf.length; eu.className = `comp-val ${unf.length > 0 ? 'negative' : ''}`;
+    const en = document.getElementById('comp-new-followers');
+    en.textContent = nwf.length; en.className = `comp-val ${nwf.length > 0 ? 'positive' : ''}`;
+    document.getElementById('comparison-results').style.display = 'block';
+};
 
-            analysisResults.notFollowingBack = followingData.filter(u => !followersSet.has(u.username));
-            analysisResults.fans = followersData.filter(u => !followingSet.has(u.username));
-            analysisResults.mutuals = followingData.filter(u => followersSet.has(u.username));
+window.deleteSnap = function(i) {
+    const s = getSnaps(); s.splice(i, 1); saveSnaps(s); renderSnaps(); showToast('Snapshot deleted');
+};
 
-            // Update main stats
-            document.getElementById('mutuals-count').textContent = analysisResults.mutuals.length;
-            document.getElementById('nfb-count').textContent = analysisResults.notFollowingBack.length;
-            document.getElementById('fans-count').textContent = analysisResults.fans.length;
+// ─── ANALYZE ───
+document.getElementById('analyze-btn').addEventListener('click', function() {
+    const fs = new Set(followersData.map(u => u.username));
+    const fos = new Set(followingData.map(u => u.username));
+    analysisResults.notFollowingBack = followingData.filter(u => !fs.has(u.username));
+    analysisResults.fans = followersData.filter(u => !fos.has(u.username));
+    analysisResults.mutuals = followingData.filter(u => fs.has(u.username));
 
-            // Update extended stats
-            document.getElementById('total-followers').textContent = followersData.length.toLocaleString();
-            document.getElementById('total-following').textContent = followingData.length.toLocaleString();
+    document.getElementById('mutuals-count').textContent = analysisResults.mutuals.length.toLocaleString();
+    document.getElementById('nfb-count').textContent = analysisResults.notFollowingBack.length.toLocaleString();
+    document.getElementById('fans-count').textContent = analysisResults.fans.length.toLocaleString();
+    document.getElementById('total-followers').textContent = followersData.length.toLocaleString();
+    document.getElementById('total-following').textContent = followingData.length.toLocaleString();
+    const fbr = followingData.length ? Math.round((analysisResults.mutuals.length / followingData.length) * 100) : 0;
+    const eng = (followersData.length + followingData.length) ? Math.round((analysisResults.mutuals.length * 2 / (followersData.length + followingData.length)) * 100) : 0;
+    document.getElementById('followback-ratio').textContent = `${fbr}%`;
+    document.getElementById('engagement-score').textContent = `${eng}%`;
 
-            const followBackRatio = followingData.length > 0
-                ? Math.round((analysisResults.mutuals.length / followingData.length) * 100)
-                : 0;
-            document.getElementById('followback-ratio').textContent = `${followBackRatio}%`;
+    drawPie(analysisResults.mutuals.length, analysisResults.notFollowingBack.length, analysisResults.fans.length);
+    refreshLists();
+    renderSnaps();
 
-            const engagementScore = (followersData.length + followingData.length) > 0
-                ? Math.round((analysisResults.mutuals.length * 2 / (followersData.length + followingData.length)) * 100)
-                : 0;
-            document.getElementById('engagement-score').textContent = `${engagementScore}%`;
-
-            // Draw chart
-            drawPieChart(
-                analysisResults.mutuals.length,
-                analysisResults.notFollowingBack.length,
-                analysisResults.fans.length
-            );
-
-            // Populate lists
-            refreshLists();
-
-            // Render snapshots
-            renderSnapshots();
-
-            // Show results
-            document.getElementById('upload-screen').style.display = 'none';
-            document.getElementById('results-screen').style.display = 'block';
-        });
-    </script>
+    document.getElementById('upload-screen').style.display = 'none';
+    document.getElementById('results-screen').style.display = 'block';
+});
+</script>
 </body>
-
 </html>
